@@ -46,7 +46,7 @@ public class ModEventListener {
         String quote = Funcs.getRandomQuote();
         // Generating "tellraw" component for quote
         quote = Funcs.handleQuote(quote, player);
-        TextComponent tellrawComponent = Funcs.generateBaseComponentForQuote(quote);
+        TextComponent tellrawComponent = Funcs.generateTellrawComponentForQuote(quote);
         if (!event.isCanceled()) {
             // Send quote only to players
             for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
