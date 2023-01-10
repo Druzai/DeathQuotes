@@ -3,9 +3,7 @@ package com.cazsius.deathquotes.event;
 import com.cazsius.deathquotes.commands.QuotesCommands;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Funcs;
-import net.minecraft.Util;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -39,18 +37,18 @@ public class ModEventListener {
         // If no quotes in the array
         if (Funcs.getQuotesLength() == 0) {
             LOGGER.error("The file " + quotesFileName + " contains no quotes. Delete it and restart for default quotes.");
-            player.sendMessage(new TextComponent("The file " + quotesFileName + " contains no quotes. Check Minecraft logs!"), Util.NIL_UUID);
+            player.sendSystemMessage(Component.literal("The file " + quotesFileName + " contains no quotes. Check Minecraft logs!"));
             return;
         }
         // Getting quote
         String quote = Funcs.getRandomQuote();
         // Generating "tellraw" component for quote
         quote = Funcs.handleQuote(quote, player);
-        TextComponent tellrawComponent = Funcs.generateBaseComponentForQuote(quote);
+        Component tellrawComponent = Funcs.generateBaseComponentForQuote(quote);
         if (!event.isCanceled()) {
             // Send quote only to players
             for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
-                serverPlayer.sendMessage(tellrawComponent, ChatType.CHAT, Util.NIL_UUID);
+                serverPlayer.sendSystemMessage(tellrawComponent);
             }
         }
     }

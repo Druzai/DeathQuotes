@@ -8,7 +8,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class QuotesCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -20,10 +20,10 @@ public class QuotesCommands {
                 Commands.literal("reloadQuotes")
                         .executes(commandContext -> {
                             if (Funcs.getState() == State.LOADING_QUOTES) {
-                                commandContext.getSource().sendSuccess(new TextComponent("Already reloading death quotes!"), true);
+                                commandContext.getSource().sendSuccess(Component.literal("Already reloading death quotes!"), true);
                             } else {
                                 boolean done = Funcs.loadQuotes(false);
-                                commandContext.getSource().sendSuccess(new TextComponent(done ? "Reloaded death quotes!" : "Failed to reload death quotes! Check Minecraft logs!"), true);
+                                commandContext.getSource().sendSuccess(Component.literal(done ? "Reloaded death quotes!" : "Failed to reload death quotes! Check Minecraft logs!"), true);
                             }
                             return Command.SINGLE_SUCCESS;
                         })

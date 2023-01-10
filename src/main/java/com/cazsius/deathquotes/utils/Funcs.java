@@ -4,9 +4,9 @@ import com.cazsius.deathquotes.DeathQuotes;
 import com.cazsius.deathquotes.impl.LimitedSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -158,15 +158,15 @@ public class Funcs {
         return quote;
     }
 
-    public static TextComponent generateBaseComponentForQuote(String quote) {
-        TextComponent tellrawComponent = new TextComponent("");
+    public static MutableComponent generateBaseComponentForQuote(String quote) {
+        MutableComponent tellrawComponent = Component.empty();
         boolean enableItalics = DeathQuotes.COMMON_CONFIG.getEnableItalics();
         // Add clickable links and/or italics if needed
         if (DeathQuotes.COMMON_CONFIG.getEnableHttpLinkProcessing() && quote.matches(".*" + httpLinkPattern.pattern() + ".*")) {
-            List<TextComponent> textInBetween = Arrays
+            List<MutableComponent> textInBetween = Arrays
                     .stream(quote.split(httpLinkPattern.pattern()))
                     .map(string -> {
-                        TextComponent textComponent = new TextComponent(string);
+                        MutableComponent textComponent = Component.literal(string);
                         if (enableItalics) {
                             textComponent.withStyle(ChatFormatting.ITALIC);
                         }
@@ -174,7 +174,7 @@ public class Funcs {
                     })
                     .toList();
             Matcher matcher = httpLinkPattern.matcher(quote);
-            for (TextComponent component : textInBetween) {
+            for (MutableComponent component : textInBetween) {
                 tellrawComponent.append(component);
                 if (matcher.find()) {
                     MutableComponent mutableComponent = Funcs.getUrlLinkComponent(matcher.group("link"));
@@ -185,7 +185,7 @@ public class Funcs {
                 }
             }
         } else {
-            TextComponent textComponent = new TextComponent(quote);
+            MutableComponent textComponent = Component.literal(quote);
             if (enableItalics) {
                 textComponent.withStyle(ChatFormatting.ITALIC);
             }
@@ -195,7 +195,7 @@ public class Funcs {
     }
 
     public static MutableComponent getUrlLinkComponent(String link) {
-        return new TextComponent(link)
+        return Component.literal(link)
                 .setStyle(Style.EMPTY
                         .applyFormat(ChatFormatting.BLUE)
                         .applyFormat(ChatFormatting.UNDERLINE)
