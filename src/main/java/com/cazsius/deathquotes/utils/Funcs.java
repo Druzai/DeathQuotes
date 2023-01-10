@@ -158,11 +158,11 @@ public class Funcs {
         return quote;
     }
 
-    public static MutableComponent generateBaseComponentForQuote(String quote) {
+    public static MutableComponent generateTellrawComponentForQuote(String quote) {
         MutableComponent tellrawComponent = Component.empty();
         boolean enableItalics = DeathQuotes.COMMON_CONFIG.getEnableItalics();
         // Add clickable links and/or italics if needed
-        if (DeathQuotes.COMMON_CONFIG.getEnableHttpLinkProcessing() && quote.matches(".*" + httpLinkPattern.pattern() + ".*")) {
+        if (DeathQuotes.COMMON_CONFIG.getEnableHttpLinkProcessing() && httpLinkPattern.matcher(quote).find()) {
             List<MutableComponent> textInBetween = Arrays
                     .stream(quote.split(httpLinkPattern.pattern()))
                     .map(string -> {
