@@ -94,8 +94,11 @@ public class Funcs {
                 int quotesNumber;
                 switch (percent) {
                     case 0 -> quotesNumber = 0;
-                    case 100 -> quotesNumber = quotes.length - 1;
+                    case 100 -> quotesNumber = quotes.length;
                     default -> quotesNumber = (int) Math.ceil((double) quotes.length / 100 * percent);
+                }
+                if (quotesNumber >= quotes.length){
+                    quotesNumber = quotes.length - 1;
                 }
                 quotesSet = new LimitedSet<>(quotesNumber, DeathQuotes.COMMON_CONFIG.getClearListOfNonRepeatableQuotes());
             } catch (UncheckedIOException ex) {
