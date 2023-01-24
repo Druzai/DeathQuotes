@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
@@ -26,10 +27,14 @@ public class ModEventListener {
         QuotesCommands.register(event.getDispatcher());
     }
 
-    @SubscribeEvent
-    public static void livingDeath(LivingDeathEvent event) {
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onLivingDeath(LivingDeathEvent event) {
         // Run only on dedicated or integrated server
         if (event.getEntity().getServer() == null) {
+            return;
+        }
+        // Check if event was cancelled by other mod
+        if (event.isCanceled()){
             return;
         }
         // For players only
@@ -47,11 +52,9 @@ public class ModEventListener {
         // Generating "tellraw" component for quote
         quote = Funcs.handleQuote(quote, player);
         TextComponent tellrawComponent = Funcs.generateTellrawComponentForQuote(quote);
-        if (!event.isCanceled()) {
-            // Send quote only to players
-            for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
-                serverPlayer.sendMessage(tellrawComponent, ChatType.CHAT, Util.NIL_UUID);
-            }
+        // Send quote only to players
+        for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
+            serverPlayer.sendMessage(tellrawComponent, ChatType.CHAT, Util.NIL_UUID);
         }
     }
 }
