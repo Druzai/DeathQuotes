@@ -12,18 +12,27 @@ import net.minecraft.network.chat.Component;
 
 public class QuotesCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        final LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder =
-                Commands.literal(Constants.ID)
+        final LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(Constants.ID)
                 .requires(commandSourceStack -> commandSourceStack.hasPermission(2));
 
         literalArgumentBuilder.then(
                 Commands.literal("reloadQuotes")
                         .executes(commandContext -> {
                             if (Funcs.getState() == State.LOADING_QUOTES) {
-                                commandContext.getSource().sendSuccess(Component.literal("Already reloading death quotes!"), true);
+                                commandContext.getSource().sendSuccess(
+                                        () -> Component.literal("Already reloading death quotes!"),
+                                        true
+                                );
                             } else {
                                 boolean done = Funcs.loadQuotes(false);
-                                commandContext.getSource().sendSuccess(Component.literal(done ? "Reloaded death quotes!" : "Failed to reload death quotes! Check Minecraft logs!"), true);
+                                commandContext.getSource().sendSuccess(
+                                        () -> Component.literal(
+                                                done
+                                                        ? "Reloaded death quotes!"
+                                                        : "Failed to reload death quotes! Check Minecraft logs!"
+                                        ),
+                                        true
+                                );
                             }
                             return Command.SINGLE_SUCCESS;
                         })
