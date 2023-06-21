@@ -163,7 +163,7 @@ public class Funcs {
 
     public static MutableComponent generateTellrawComponentForQuote(String quote) {
         MutableComponent tellrawComponent = Component.empty();
-        boolean enableItalics = DeathQuotes.COMMON_CONFIG.getEnableItalics();
+        final boolean enableItalics = DeathQuotes.COMMON_CONFIG.getEnableItalics();
         // Add clickable links and/or italics if needed
         if (DeathQuotes.COMMON_CONFIG.getEnableHttpLinkProcessing() && httpLinkPattern.matcher(quote).find()) {
             List<MutableComponent> textInBetween = Arrays

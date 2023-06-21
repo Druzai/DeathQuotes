@@ -3,8 +3,8 @@ package com.cazsius.deathquotes.config;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class CommonConfig {
-    private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-    private ForgeConfigSpec spec;
+    private final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+    private final ForgeConfigSpec spec;
     private ForgeConfigSpec.IntValue nonRepeatablePercent;
     private ForgeConfigSpec.BooleanValue clearListOfNonRepeatableQuotes;
     private ForgeConfigSpec.BooleanValue enableQuotationMarks;

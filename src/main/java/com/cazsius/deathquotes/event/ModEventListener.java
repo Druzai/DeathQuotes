@@ -32,7 +32,7 @@ public class ModEventListener {
             return;
         }
         // Check if event was cancelled by other mod
-        if (event.isCanceled()){
+        if (event.isCanceled()) {
             return;
         }
         // For players only
