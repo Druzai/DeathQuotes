@@ -2,19 +2,19 @@ package com.cazsius.deathquotes.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
-public class CommonConfig {
-    private final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-    private final ForgeConfigSpec spec;
-    private ForgeConfigSpec.IntValue nonRepeatablePercent;
-    private ForgeConfigSpec.BooleanValue clearListOfNonRepeatableQuotes;
-    private ForgeConfigSpec.BooleanValue enableQuotationMarks;
-    private ForgeConfigSpec.BooleanValue enableItalics;
-    private ForgeConfigSpec.BooleanValue enableHttpLinkProcessing;
-    private ForgeConfigSpec.ConfigValue<String> playerNameReplaceString;
-    private ForgeConfigSpec.ConfigValue<String> nextLineReplaceString;
-    private ForgeConfigSpec.BooleanValue enableTrimmingBeforeAndAfterNextLine;
+public final class CommonConfig {
+    private static final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+    private static ForgeConfigSpec spec;
+    private static ForgeConfigSpec.IntValue nonRepeatablePercent;
+    private static ForgeConfigSpec.BooleanValue clearListOfNonRepeatableQuotes;
+    private static ForgeConfigSpec.BooleanValue enableQuotationMarks;
+    private static ForgeConfigSpec.BooleanValue enableItalics;
+    private static ForgeConfigSpec.BooleanValue enableHttpLinkProcessing;
+    private static ForgeConfigSpec.ConfigValue<String> playerNameReplaceString;
+    private static ForgeConfigSpec.ConfigValue<String> nextLineReplaceString;
+    private static ForgeConfigSpec.BooleanValue enableTrimmingBeforeAndAfterNextLine;
 
-    public CommonConfig() {
+    public static void build() {
         builder.push("deathQuotes");
         setMainOptions();
         setFormattingOptions();
@@ -23,7 +23,7 @@ public class CommonConfig {
         spec = builder.build();
     }
 
-    private void setMainOptions() {
+    private static void setMainOptions() {
         builder.push("mainOptions");
         nonRepeatablePercent = builder
                 .comment("""
@@ -46,7 +46,7 @@ public class CommonConfig {
                 .comment("""
                         String to replace with the player's name in the death message.
                         Empty string or string only with whitespaces will disable the feature!
-                        
+                                                
                         Example: '${{player_name}} didn't make it.'""")
                 .define("playerNameReplaceString", "${{player_name}}");
         nextLineReplaceString = builder
@@ -69,7 +69,7 @@ public class CommonConfig {
         builder.pop();
     }
 
-    private void setFormattingOptions() {
+    private static void setFormattingOptions() {
         builder.push("formattingOptions");
         enableQuotationMarks = builder
                 .comment("Specifies whether death messages should be in quotation marks, default is TRUE")
@@ -86,71 +86,18 @@ public class CommonConfig {
         builder.pop();
     }
 
-    public ForgeConfigSpec getSpec() {
+    public static ForgeConfigSpec getSpec() {
         return spec;
     }
 
-    public int getNonRepeatablePercent() {
-        return nonRepeatablePercent.get();
-    }
-
-    public void setNonRepeatablePercent(int nonRepeatablePercent) {
-        this.nonRepeatablePercent.set(nonRepeatablePercent);
-    }
-
-    public boolean getClearListOfNonRepeatableQuotes() {
-        return clearListOfNonRepeatableQuotes.get();
-    }
-
-    public void setClearListOfNonRepeatableQuotes(boolean clearListOfNonRepeatableQuotes) {
-        this.clearListOfNonRepeatableQuotes.set(clearListOfNonRepeatableQuotes);
-    }
-
-    public boolean getEnableQuotationMarks() {
-        return enableQuotationMarks.get();
-    }
-
-    public void setEnableQuotationMarks(boolean enableQuotationMarks) {
-        this.enableQuotationMarks.set(enableQuotationMarks);
-    }
-
-    public boolean getEnableItalics() {
-        return enableItalics.get();
-    }
-
-    public void setEnableItalics(boolean enableItalics) {
-        this.enableItalics.set(enableItalics);
-    }
-
-    public boolean getEnableHttpLinkProcessing() {
-        return enableHttpLinkProcessing.get();
-    }
-
-    public void setEnableHttpLinkProcessing(boolean enableHttpLinkProcessing) {
-        this.enableHttpLinkProcessing.set(enableHttpLinkProcessing);
-    }
-
-    public String getPlayerNameReplaceString() {
-        return playerNameReplaceString.get();
-    }
-
-    public void setPlayerNameReplaceString(String playerNameReplaceString) {
-        this.playerNameReplaceString.set(playerNameReplaceString);
-    }
-
-    public String getNextLineReplaceString() {
-        return nextLineReplaceString.get();
-    }
-
-    public void setNextLineReplaceString(String nextLineReplaceString) {
-        this.nextLineReplaceString.set(nextLineReplaceString);
-    }
-
-    public boolean getEnableTrimmingBeforeAndAfterNextLine() {
-        return enableTrimmingBeforeAndAfterNextLine.get();
-    }
-
-    public void setEnableTrimmingBeforeAndAfterNextLine(boolean enableTrimmingBeforeAndAfterNextLine) {
-        this.enableTrimmingBeforeAndAfterNextLine.set(enableTrimmingBeforeAndAfterNextLine);
+    public static void pushChanges() {
+        Settings.setNonRepeatablePercent(nonRepeatablePercent.get());
+        Settings.setClearListOfNonRepeatableQuotes(clearListOfNonRepeatableQuotes.get());
+        Settings.setEnableQuotationMarks(enableQuotationMarks.get());
+        Settings.setEnableItalics(enableItalics.get());
+        Settings.setEnableHttpLinkProcessing(enableHttpLinkProcessing.get());
+        Settings.setPlayerNameReplaceString(playerNameReplaceString.get());
+        Settings.setNextLineReplaceString(nextLineReplaceString.get());
+        Settings.setEnableTrimmingBeforeAndAfterNextLine(enableTrimmingBeforeAndAfterNextLine.get());
     }
 }

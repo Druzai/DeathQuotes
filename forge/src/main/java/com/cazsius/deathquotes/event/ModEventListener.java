@@ -3,6 +3,7 @@ package com.cazsius.deathquotes.event;
 import com.cazsius.deathquotes.commands.QuotesCommands;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Funcs;
+import com.cazsius.deathquotes.utils.Logger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -11,15 +12,11 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import static com.cazsius.deathquotes.utils.Constants.quotesFileName;
 
 @Mod.EventBusSubscriber(modid = Constants.ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModEventListener {
-    private static final Logger LOGGER = LogManager.getLogger();
-
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
         QuotesCommands.register(event.getDispatcher());
@@ -41,7 +38,8 @@ public class ModEventListener {
         }
         // If no quotes in the array
         if (Funcs.getQuotesLength() == 0) {
-            LOGGER.error("The file " + quotesFileName + " contains no quotes. Delete it and restart for default quotes.");
+            Logger.error("The file " + quotesFileName + " contains no quotes. Delete it and restart for default quotes. " +
+                    "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
             player.sendSystemMessage(Component.literal("The file " + quotesFileName + " contains no quotes. Check Minecraft logs!"));
             return;
         }

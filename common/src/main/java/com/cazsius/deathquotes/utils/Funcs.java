@@ -1,6 +1,6 @@
 package com.cazsius.deathquotes.utils;
 
-import com.cazsius.deathquotes.DeathQuotes;
+import com.cazsius.deathquotes.config.Settings;
 import com.cazsius.deathquotes.impl.LimitedSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
@@ -8,8 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -30,8 +29,7 @@ import java.util.stream.Stream;
 
 import static com.cazsius.deathquotes.utils.Constants.*;
 
-public class Funcs {
-    private static final Logger LOGGER = LogManager.getLogger();
+public final class Funcs {
     private static String[] quotes = null;
     private static LimitedSet<Integer> quotesSet;
     private static final Random randomGenerator = new Random();
@@ -47,14 +45,14 @@ public class Funcs {
             URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
             sourceDirectory = Paths.get(uri);
         } catch (Exception ex) {
-            LOGGER.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
+            Logger.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
             return false;
         }
         Path targetDirectory = Paths.get(quotesPathAndFileName);
         try {
             Files.copy(sourceDirectory, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
-            LOGGER.error("Couldn't copy the file \"" + quotesFileName + "\" from jar to \"config\" folder!");
+            Logger.error("Couldn't copy the file \"" + quotesFileName + "\" from jar to \"config\" folder!");
             return false;
         }
         return true;
@@ -79,7 +77,7 @@ public class Funcs {
                 URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
                 sourceDirectory = Paths.get(uri);
             } catch (Exception ex) {
-                LOGGER.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
+                Logger.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
                 state = previousState;
                 return false;
             }
@@ -90,17 +88,17 @@ public class Funcs {
         for (Charset charset : charsets) {
             try (Stream<String> lines = Files.lines(sourceDirectory, charset)) {
                 quotes = lines.filter(s -> !s.isBlank()).map(String::trim).toArray(String[]::new);
-                int percent = DeathQuotes.COMMON_CONFIG.getNonRepeatablePercent();
+                int percent = Settings.getNonRepeatablePercent();
                 int quotesNumber;
                 switch (percent) {
                     case 0 -> quotesNumber = 0;
                     case 100 -> quotesNumber = quotes.length;
                     default -> quotesNumber = (int) Math.ceil((double) quotes.length / 100 * percent);
                 }
-                if (quotesNumber >= quotes.length){
+                if (quotesNumber >= quotes.length) {
                     quotesNumber = quotes.length - 1;
                 }
-                quotesSet = new LimitedSet<>(quotesNumber, DeathQuotes.COMMON_CONFIG.getClearListOfNonRepeatableQuotes());
+                quotesSet = new LimitedSet<>(quotesNumber, Settings.getClearListOfNonRepeatableQuotes());
             } catch (UncheckedIOException ex) {
                 continue;
             } catch (IOException ex) {
@@ -109,15 +107,15 @@ public class Funcs {
             }
             state = previousState;
             // Status - Ready
-            LOGGER.info("Loaded death quotes!");
-            LOGGER.info("Death quotes count - " + Funcs.getQuotesLength());
+            Logger.info("Loaded death quotes!");
+            Logger.info("Death quotes count - " + Funcs.getQuotesLength());
             return true;
         }
         state = previousState;
-        LOGGER.error("Couldn't read quotes the file \"" + quotesFileName + "\" from " +
+        Logger.error("Couldn't read quotes the file \"" + quotesFileName + "\" from " +
                 (fromJar ? "jar" : "\"config\" folder") + (encodingException ? " because encoding wasn't \"UTF-8\"" : "") + "!");
-        LOGGER.error("Death quotes won't work because there is no quotes available!");
-        LOGGER.error("You can delete the file " + quotesFileName + " and restart Minecraft for default quotes! " +
+        Logger.error("Death quotes won't work because there is no quotes available!");
+        Logger.error("You can delete the file " + quotesFileName + " and restart Minecraft for default quotes! " +
                 "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
         return false;
     }
@@ -135,37 +133,37 @@ public class Funcs {
                 quotesSet.add(randomNumber);
                 return quotes[randomNumber];
             }
-            LOGGER.error(String.format("Searched for the fresh quote for too long (more than %s tries)!", maxIterations));
+            Logger.error(String.format("Searched for the fresh quote for too long (more than %s tries)!", maxIterations));
         }
         return quotes[randomGenerator.nextInt(Funcs.getQuotesLength())];
     }
 
     public static String handleQuote(String quote, Player player) {
         // Replace player name string if needed
-        String replaceString = DeathQuotes.COMMON_CONFIG.getPlayerNameReplaceString();
+        String replaceString = Settings.getPlayerNameReplaceString();
         if (!replaceString.isBlank() && quote.contains(replaceString)) {
             quote = quote.replace(replaceString, player.getGameProfile().getName());
         }
         // Replace next line string if needed
-        replaceString = DeathQuotes.COMMON_CONFIG.getNextLineReplaceString();
+        replaceString = Settings.getNextLineReplaceString();
         if (!replaceString.isBlank() && quote.contains(replaceString)) {
             quote = quote.replace(replaceString, "\n");
-            if (DeathQuotes.COMMON_CONFIG.getEnableTrimmingBeforeAndAfterNextLine()) {
+            if (Settings.getEnableTrimmingBeforeAndAfterNextLine()) {
                 quote = quote.replaceAll("\s*\n\s*", "\n");
             }
         }
         // Add quotation marks if needed
-        if (DeathQuotes.COMMON_CONFIG.getEnableQuotationMarks()) {
-            quote = "\"" + quote + "\"";
+        if (Settings.getEnableQuotationMarks()) {
+            quote = MessageFormat.format("\"{0}\"", quote);
         }
         return quote;
     }
 
     public static MutableComponent generateTellrawComponentForQuote(String quote) {
         MutableComponent tellrawComponent = Component.empty();
-        final boolean enableItalics = DeathQuotes.COMMON_CONFIG.getEnableItalics();
+        final boolean enableItalics = Settings.getEnableItalics();
         // Add clickable links and/or italics if needed
-        if (DeathQuotes.COMMON_CONFIG.getEnableHttpLinkProcessing() && httpLinkPattern.matcher(quote).find()) {
+        if (Settings.getEnableHttpLinkProcessing() && httpLinkPattern.matcher(quote).find()) {
             List<MutableComponent> textInBetween = Arrays
                     .stream(quote.split(httpLinkPattern.pattern()))
                     .map(string -> {
