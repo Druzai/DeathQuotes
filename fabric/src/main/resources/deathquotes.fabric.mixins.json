@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.cazsius.deathquotes.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "client": [
+    "application.ClientMinecraftMixin"
+  ],
+  "server": [
+    "application.MinecraftServerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

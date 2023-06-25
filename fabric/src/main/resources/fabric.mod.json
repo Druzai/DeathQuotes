@@ -20,6 +20,9 @@
       "com.cazsius.deathquotes.DeathQuotes"
     ]
   },
+  "mixins": [
+    "deathquotes.fabric.mixins.json"
+  ],
 
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",

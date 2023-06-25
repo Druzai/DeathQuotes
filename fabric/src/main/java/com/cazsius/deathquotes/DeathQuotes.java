@@ -1,5 +1,6 @@
 package com.cazsius.deathquotes;
 
+import com.cazsius.deathquotes.api.application.ApplicationEvents;
 import com.cazsius.deathquotes.config.ConfigFileHandler;
 import com.cazsius.deathquotes.event.ModEventListener;
 import com.cazsius.deathquotes.utils.Funcs;
@@ -34,5 +35,6 @@ public class DeathQuotes implements ModInitializer {
     private void registerEvents() {
         CommandRegistrationCallback.EVENT.register(ModEventListener::registerCommands);
         ServerLivingEntityEvents.AFTER_DEATH.register(ModEventListener::onLivingDeath);
+        ApplicationEvents.BEFORE_SHUTDOWN.register(ModEventListener::beforeShutdown);
     }
 }
