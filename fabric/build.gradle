@@ -18,6 +18,14 @@ dependencyProjects.forEach {
     project.evaluationDependsOn(it.path)
 }
 
+configurations {
+    include
+
+    implementation {
+        extendsFrom include
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings(loom.layered {
@@ -26,8 +34,8 @@ dependencies {
     })
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
-    implementation "com.electronwill.night-config:core:${fabric_night_config_version}"
-    implementation "com.electronwill.night-config:toml:${fabric_night_config_version}"
+    include "com.electronwill.night-config:core:${fabric_night_config_version}"
+    include "com.electronwill.night-config:toml:${fabric_night_config_version}"
     dependencyProjects.forEach {
         implementation it
     }

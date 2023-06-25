@@ -65,7 +65,7 @@ public class CommonConfig {
             try {
                 value = f.get(configClass);
             } catch (IllegalAccessException e) {
-                Logger.error("Couldn't access field \"{}\" of object \"{}\"! Skipping...", f.getName(), ConfigData.class.getName());
+                Logger.error("Couldn't access field \"{}\" of object \"{}\"! Skipping...", f.getName(), configClass.getClass().getName());
                 continue;
             }
             List<String> path = getPath(f);
@@ -93,21 +93,21 @@ public class CommonConfig {
 
     private static class ConfigData {
         @Path("deathQuotes.mainOptions.nonRepeatablePercent")
-        private int nonRepeatablePercent;
+        private int nonRepeatablePercent = 5;
         @Path("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes")
-        private boolean clearListOfNonRepeatableQuotes;
+        private boolean clearListOfNonRepeatableQuotes = false;
         @Path("deathQuotes.mainOptions.playerNameReplaceString")
-        private String playerNameReplaceString;
+        private String playerNameReplaceString = "${{player_name}}";
         @Path("deathQuotes.mainOptions.nextLineReplaceString")
-        private String nextLineReplaceString;
+        private String nextLineReplaceString = "${{next_line}}";
         @Path("deathQuotes.mainOptions.enableTrimmingBeforeAndAfterNextLine")
-        private boolean enableTrimmingBeforeAndAfterNextLine;
+        private boolean enableTrimmingBeforeAndAfterNextLine = false;
         @Path("deathQuotes.formattingOptions.enableQuotationMarks")
-        private boolean enableQuotationMarks;
+        private boolean enableQuotationMarks = true;
         @Path("deathQuotes.formattingOptions.enableItalics")
-        private boolean enableItalics;
+        private boolean enableItalics = false;
         @Path("deathQuotes.formattingOptions.enableHttpLinkProcessing")
-        private boolean enableHttpLinkProcessing;
+        private boolean enableHttpLinkProcessing = false;
 
         public void pushChanges() {
             Settings.setNonRepeatablePercent(nonRepeatablePercent);
