@@ -3,6 +3,7 @@ package com.cazsius.deathquotes.config;
 import com.cazsius.deathquotes.utils.Logger;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigFormat;
+import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.conversion.ObjectConverter;
 import com.electronwill.nightconfig.core.conversion.Path;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
@@ -13,33 +14,49 @@ import java.util.Collections;
 import java.util.List;
 
 public class CommonConfig {
+    private static ConfigSpec spec;
+
     public static void updateChanges(CommentedFileConfig commentedFileConfig, boolean updateConfig) {
         ConfigData configData;
-        boolean boundsChanged = false;
-        boolean setDefaultValues = false;
+        boolean toSave;
         if (commentedFileConfig.isEmpty()) {
             configData = new ConfigData();
+            toSave = true;
         } else {
             try {
+                toSave = correct(commentedFileConfig) > 0;
                 configData = new ObjectConverter().toObject(commentedFileConfig, ConfigData::new);
-                boundsChanged = configData.checkBounds() != 0;
             } catch (Exception ex) {
                 Logger.error("Couldn't convert config \"{}\" to object! Falling back to using default values!", commentedFileConfig.getFile().getName(), ex);
                 configData = new ConfigData();
-                setDefaultValues = true;
+                toSave = true;
             }
         }
         configData.pushChanges();
-        if (!updateConfig || boundsChanged || setDefaultValues) {
+        if (updateConfig || toSave) {
             convertConfigData(commentedFileConfig, configData);
             commentedFileConfig.save();
             Logger.debug("Saved TOML config file {}", commentedFileConfig.getFile().getPath());
         }
     }
 
-    public static boolean correct(CommentedFileConfig commentedFileConfig) {
-        // TODO: add handling...
-        return true;
+    public static int correct(CommentedConfig commentedFileConfig) {
+        return getConfigSpec().correct(commentedFileConfig);
+    }
+
+    private static ConfigSpec getConfigSpec() {
+        if (spec == null) {
+            spec = new ConfigSpec();
+            spec.defineInRange("deathQuotes.mainOptions.nonRepeatablePercent", 5, 0, 100);
+            spec.define("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes", false);
+            spec.define("deathQuotes.mainOptions.playerNameReplaceString", "${{player_name}}");
+            spec.define("deathQuotes.mainOptions.nextLineReplaceString", "${{next_line}}");
+            spec.define("deathQuotes.mainOptions.enableTrimmingBeforeAndAfterNextLine", false);
+            spec.define("deathQuotes.formattingOptions.enableQuotationMarks", true);
+            spec.define("deathQuotes.formattingOptions.enableItalics", false);
+            spec.define("deathQuotes.formattingOptions.enableHttpLinkProcessing", false);
+        }
+        return spec;
     }
 
     public static void convertConfigData(CommentedConfig commentedFileConfig, Object configClass) {
@@ -48,7 +65,7 @@ public class CommonConfig {
             try {
                 value = f.get(configClass);
             } catch (IllegalAccessException e) {
-                Logger.error("Couldn't access field \"{}\" of object \"{}\"! Skipping...", f.getName(), CommonConfig.class.getName());
+                Logger.error("Couldn't access field \"{}\" of object \"{}\"! Skipping...", f.getName(), ConfigData.class.getName());
                 continue;
             }
             List<String> path = getPath(f);
@@ -76,30 +93,21 @@ public class CommonConfig {
 
     private static class ConfigData {
         @Path("deathQuotes.mainOptions.nonRepeatablePercent")
-        private int nonRepeatablePercent = 5;
+        private int nonRepeatablePercent;
         @Path("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes")
-        private boolean clearListOfNonRepeatableQuotes = false;
+        private boolean clearListOfNonRepeatableQuotes;
         @Path("deathQuotes.mainOptions.playerNameReplaceString")
-        private String playerNameReplaceString = "${{player_name}}";
+        private String playerNameReplaceString;
         @Path("deathQuotes.mainOptions.nextLineReplaceString")
-        private String nextLineReplaceString = "${{next_line}}";
+        private String nextLineReplaceString;
         @Path("deathQuotes.mainOptions.enableTrimmingBeforeAndAfterNextLine")
-        private boolean enableTrimmingBeforeAndAfterNextLine = false;
+        private boolean enableTrimmingBeforeAndAfterNextLine;
         @Path("deathQuotes.formattingOptions.enableQuotationMarks")
-        private boolean enableQuotationMarks = true;
+        private boolean enableQuotationMarks;
         @Path("deathQuotes.formattingOptions.enableItalics")
-        private boolean enableItalics = false;
+        private boolean enableItalics;
         @Path("deathQuotes.formattingOptions.enableHttpLinkProcessing")
-        private boolean enableHttpLinkProcessing = false;
-
-        public int checkBounds() {
-            int changes = 0;
-            if (nonRepeatablePercent < 0 || nonRepeatablePercent > 100) {
-                nonRepeatablePercent = 5;
-                changes++;
-            }
-            return changes;
-        }
+        private boolean enableHttpLinkProcessing;
 
         public void pushChanges() {
             Settings.setNonRepeatablePercent(nonRepeatablePercent);
