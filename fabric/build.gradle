@@ -1,0 +1,94 @@
+import net.fabricmc.loom.task.RemapJarTask
+
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'fabric-loom' version '1.2-SNAPSHOT'
+}
+
+base {
+    archivesName = "${mod_id}-fabric"
+}
+
+def dependencyProjects = [
+        project(":common"),
+]
+
+dependencyProjects.forEach {
+    project.evaluationDependsOn(it.path)
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings(loom.layered {
+        officialMojangMappings()
+//        parchment "org.parchmentmc.data:parchment-${minecraft_version}:${fabric_parchment_version}@zip"
+    })
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    implementation "com.electronwill.night-config:core:${fabric_night_config_version}"
+    implementation "com.electronwill.night-config:toml:${fabric_night_config_version}"
+    dependencyProjects.forEach {
+        implementation it
+    }
+}
+
+loom {
+    runs {
+        named("client") {
+            client()
+            configName = "Fabric Client"
+            ideConfigGenerated(true)
+            runDir("run/client")
+            programArgs("--username", "Dev")
+        }
+        named("server") {
+            server()
+            configName = "Fabric Server"
+            ideConfigGenerated(true)
+            runDir("run/server")
+        }
+    }
+}
+
+java {
+    withSourcesJar()
+}
+
+tasks.withType(ProcessResources).configureEach {
+    for (p in dependencyProjects) {
+        from p.sourceSets.main.resources
+    }
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn classes
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+
+    for (p in dependencyProjects) {
+        from p.sourceSets.main.allJava
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named('jar', Jar) {
+    from sourceSets.main.output
+    for (p in dependencyProjects) {
+        from p.sourceSets.main.output
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(Jar).configureEach {
+    destinationDirectory.set(file(rootProject.rootDir.path + "/output"))
+}
+
+tasks.withType(RemapJarTask).configureEach {
+    destinationDirectory.set(file(rootProject.rootDir.path + "/output"))
+}
+
+artifacts {
+    archives remapJar
+    archives remapSourcesJar
+}

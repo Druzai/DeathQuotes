@@ -20,6 +20,10 @@ public class DeathQuotes {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        // If config folder doesn't exist in root directory - create one
+        if (!Funcs.configDirExists()) {
+            Funcs.createConfigDir();
+        }
         // If no quotes file in the config folder - create the default from the one in the jar file assets folder
         boolean readFromJar = false;
         if (!Funcs.quotesFileExistsInConfig()) {

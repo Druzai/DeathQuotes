@@ -7,6 +7,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.io.File;
@@ -20,10 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
@@ -41,13 +39,11 @@ public final class Funcs {
 
     public static boolean copyQuotesToConfig() {
         Path sourceDirectory;
-        try {
-            URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
-            sourceDirectory = Paths.get(uri);
-        } catch (Exception ex) {
-            Logger.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
+        Optional<Path> optionalPath = getQuotesFileDirFromJar();
+        if (optionalPath.isEmpty()) {
             return false;
         }
+        sourceDirectory = optionalPath.get();
         Path targetDirectory = Paths.get(quotesPathAndFileName);
         try {
             Files.copy(sourceDirectory, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
@@ -62,9 +58,38 @@ public final class Funcs {
         return fileExists(quotesPathAndFileName);
     }
 
+    public static boolean configDirExists() {
+        return folderExists(quotesConfigPath);
+    }
+
     public static boolean fileExists(String filePathAndName) {
         File fh = new File(filePathAndName);
         return fh.exists() && !fh.isDirectory();
+    }
+
+    public static boolean folderExists(String folderPath) {
+        File fh = new File(folderPath);
+        return fh.exists() && fh.isDirectory();
+    }
+
+    public static boolean createConfigDir() {
+        try {
+            Files.createDirectories(Paths.get(quotesConfigPath));
+            return true;
+        } catch (Exception ex) {
+            Logger.error("Couldn't create \"config\" folder in root directory!");
+            return false;
+        }
+    }
+
+    public static Optional<Path> getQuotesFileDirFromJar() {
+        try {
+            URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
+            return Optional.of(Paths.get(uri));
+        } catch (Exception ex) {
+            Logger.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
+            return Optional.empty();
+        }
     }
 
     public static boolean loadQuotes(boolean fromJar) {
@@ -73,14 +98,12 @@ public final class Funcs {
         Path sourceDirectory;
         boolean encodingException = true;
         if (fromJar) {
-            try {
-                URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
-                sourceDirectory = Paths.get(uri);
-            } catch (Exception ex) {
-                Logger.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
+            Optional<Path> optionalPath = getQuotesFileDirFromJar();
+            if (optionalPath.isEmpty()) {
                 state = previousState;
                 return false;
             }
+            sourceDirectory = optionalPath.get();
         } else {
             sourceDirectory = Paths.get(quotesPathAndFileName);
         }
@@ -118,6 +141,25 @@ public final class Funcs {
         Logger.error("You can delete the file " + quotesFileName + " and restart Minecraft for default quotes! " +
                 "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
         return false;
+    }
+
+    public static void handlePlayerDeath(Player player) {
+        // If no quotes in the array
+        if (Funcs.getQuotesLength() == 0) {
+            Logger.error("The file " + quotesFileName + " contains no quotes. Delete it and restart for default quotes. " +
+                    "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
+            player.sendSystemMessage(Component.literal("The file " + quotesFileName + " contains no quotes. Check Minecraft logs!"));
+            return;
+        }
+        // Getting quote
+        String quote = Funcs.getRandomQuote();
+        // Generating "tellraw" component for quote
+        quote = Funcs.handleQuote(quote, player);
+        Component tellrawComponent = Funcs.generateTellrawComponentForQuote(quote);
+        // Send quote only to players
+        for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
+            serverPlayer.sendSystemMessage(tellrawComponent);
+        }
     }
 
     public static int getQuotesLength() {

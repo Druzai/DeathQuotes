@@ -12,21 +12,26 @@ subprojects {
     def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta', 'fabric.mod.json']
     def replaceProperties = [
             minecraft_version            : minecraft_version,
+            minecraft_java_build_version : minecraft_java_build_version,
             forge_minecraft_version_range: forge_minecraft_version_range,
             forge_version                : forge_version,
             forge_version_range          : forge_version_range,
             forge_loader_version_range   : forge_loader_version_range,
+            fabric_loader_version        : fabric_loader_version,
+            fabric_minecraft_versions    : fabric_minecraft_versions,
+            fabric_api_version           : fabric_api_version,
             mod_id                       : mod_id,
             mod_name                     : mod_name,
             mod_license                  : mod_license,
             mod_version                  : mod_version,
             mod_authors                  : mod_authors,
-            mod_description              : mod_description
-            // TODO: Add for fabric replacements!!!
+            mod_description              : mod_description,
+            mod_curseforge_link          : mod_curseforge_link,
+            mod_github_link              : mod_github_link
     ]
     tasks.withType(ProcessResources).configureEach {
         inputs.properties replaceProperties
-        replaceProperties.put 'project', project
+//        replaceProperties.put 'project', project
 
         filesMatching(resourceTargets) {
             expand replaceProperties

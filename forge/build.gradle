@@ -24,7 +24,6 @@ dependencies {
     }
 }
 
-
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
 
@@ -72,6 +71,7 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
+            arg 'nogui'
 
             mods {
                 "${mod_id}" {
