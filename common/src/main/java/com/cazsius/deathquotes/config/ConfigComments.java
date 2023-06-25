@@ -9,7 +9,7 @@ public final class ConfigComments {
     public static final String nonRepeatablePercent = """
             Specifies the percentage of non-repeatable quotes
             100 - each quote is guaranteed to appear, but quotes will be repeated in a circle if option "clearListOfNonRepeatableQuotes" is set to FALSE
-            0 - each quote might repeat frequently
+            0 - each quote might repeat frequently (i.e. old deathquotes mod behaviour)
                                     
             If you change it in runtime - reload quotes from file "deathquotes.txt"!""";
     public static final String clearListOfNonRepeatableQuotes = """
@@ -21,12 +21,12 @@ public final class ConfigComments {
             If you change it in runtime - reload quotes from file "deathquotes.txt"!""";
     public static final String playerNameReplaceString = """
             String to replace with the player's name in the death message.
-            Empty string or string only with whitespaces will disable the feature!
+            Empty string or string only with whitespaces will disable this feature!
                                     
             Example: '${{player_name}} didn't make it.'""";
     public static final String nextLineReplaceString = """
             String to replace with the next line symbol in the death message.
-            Empty string or string only with whitespaces will disable the feature!
+            Empty string or string only with whitespaces will disable this feature!
                                     
             It can be used in dialogs for example:
             In deathquotes.txt:

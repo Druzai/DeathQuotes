@@ -31,7 +31,7 @@ public class ConfigFileHandler {
         Logger.debug("Built TOML config for {}", configPath.toString());
         try {
             configData.load();
-            CommonConfig.updateChanges(configData, configPath, false);
+            CommonConfig.updateChanges(configData, false);
         } catch (ParsingException ex) {
             throw new RuntimeException("Couldn't load config file", ex);
         }
@@ -85,8 +85,8 @@ public class ConfigFileHandler {
             } catch (ParsingException ex) {
                 throw new RuntimeException("Couldn't load config file", ex);
             }
-            Logger.debug("Config file {} changed, updating values", configPath.toString());
-            CommonConfig.updateChanges(commentedFileConfig, configPath, true);
+            Logger.debug("Config file {} changed, updating values", commentedFileConfig.getFile().getName());
+            CommonConfig.updateChanges(commentedFileConfig, true);
         }
     }
 }
