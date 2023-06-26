@@ -47,6 +47,7 @@ public class CommonConfig {
     private static ConfigSpec getConfigSpec() {
         if (spec == null) {
             spec = new ConfigSpec();
+            spec.define("deathQuotes.mainOptions.showDeathQuotesRegardlessOfGameRule", true);
             spec.defineInRange("deathQuotes.mainOptions.nonRepeatablePercent", 5, 0, 100);
             spec.define("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes", false);
             spec.define("deathQuotes.mainOptions.playerNameReplaceString", "${{player_name}}");
@@ -92,6 +93,8 @@ public class CommonConfig {
     }
 
     private static class ConfigData {
+        @Path("deathQuotes.mainOptions.showDeathQuotesRegardlessOfGameRule")
+        private boolean showDeathQuotesRegardlessOfGameRule = true;
         @Path("deathQuotes.mainOptions.nonRepeatablePercent")
         private int nonRepeatablePercent = 5;
         @Path("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes")
@@ -110,6 +113,7 @@ public class CommonConfig {
         private boolean enableHttpLinkProcessing = false;
 
         public void pushChanges() {
+            Settings.setShowDeathQuotesRegardlessOfGameRule(showDeathQuotesRegardlessOfGameRule);
             Settings.setNonRepeatablePercent(nonRepeatablePercent);
             Settings.setClearListOfNonRepeatableQuotes(clearListOfNonRepeatableQuotes);
             Settings.setEnableQuotationMarks(enableQuotationMarks);

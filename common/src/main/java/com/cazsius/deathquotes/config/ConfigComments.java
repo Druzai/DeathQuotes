@@ -6,6 +6,10 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 
 public final class ConfigComments {
+    public static final String showDeathQuotesRegardlessOfGameRule = """
+            Specifies whether death quotes should be displayed based on the value of gamerule "showDeathMessages" or not, default is TRUE
+            If FALSE - death quotes will be displayed only if the value of gamerule "showDeathMessages" set to "true"
+            If TRUE - death quotes will be displayed regardless of the value of gamerule "showDeathMessages\"""";
     public static final String nonRepeatablePercent = """
             Specifies the percentage of non-repeatable quotes
             100 - each quote is guaranteed to appear, but quotes will be repeated in a circle if option "clearListOfNonRepeatableQuotes" is set to FALSE
@@ -44,6 +48,7 @@ public final class ConfigComments {
             "Specifies whether death messages should be italicized, default is FALSE";
     public static final String enableHttpLinkProcessing = """
             Specifies whether http(s) links in death messages should be clickable, default is FALSE
+                        
             Note: It's better to separate links with spaces for better recognition!
             Example: 'Quote with the links: "https://www.google.com/", https://www.youtube.com/watch?v=dQw4w9WgXcQ !'""";
 

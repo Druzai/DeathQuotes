@@ -1,6 +1,7 @@
 package com.cazsius.deathquotes.config;
 
 public final class Settings {
+    private static boolean showDeathQuotesRegardlessOfGameRule;
     private static int nonRepeatablePercent;
     private static boolean clearListOfNonRepeatableQuotes;
     private static boolean enableQuotationMarks;
@@ -9,6 +10,14 @@ public final class Settings {
     private static String playerNameReplaceString;
     private static String nextLineReplaceString;
     private static boolean enableTrimmingBeforeAndAfterNextLine;
+
+    public static boolean getShowDeathQuotesRegardlessOfGameRule() {
+        return showDeathQuotesRegardlessOfGameRule;
+    }
+
+    public static void setShowDeathQuotesRegardlessOfGameRule(boolean showDeathQuotesRegardlessOfGameRule) {
+        Settings.showDeathQuotesRegardlessOfGameRule = showDeathQuotesRegardlessOfGameRule;
+    }
 
     public static int getNonRepeatablePercent() {
         return nonRepeatablePercent;

@@ -1,9 +1,11 @@
 package com.cazsius.deathquotes.event;
 
 import com.cazsius.deathquotes.commands.QuotesCommands;
+import com.cazsius.deathquotes.config.Settings;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Funcs;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -29,6 +31,10 @@ public class ModEventListener {
         }
         // For players only
         if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        // Check gamerule "showDeathMessages" and associated config parameter
+        if (!Settings.getShowDeathQuotesRegardlessOfGameRule() && !player.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
             return;
         }
         Funcs.handlePlayerDeath(player);

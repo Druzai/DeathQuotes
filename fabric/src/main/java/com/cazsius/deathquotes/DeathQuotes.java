@@ -1,12 +1,12 @@
 package com.cazsius.deathquotes;
 
 import com.cazsius.deathquotes.api.application.ApplicationEvents;
+import com.cazsius.deathquotes.api.entity.ServerPlayerEvents;
 import com.cazsius.deathquotes.config.ConfigFileHandler;
 import com.cazsius.deathquotes.event.ModEventListener;
 import com.cazsius.deathquotes.utils.Funcs;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 
 public class DeathQuotes implements ModInitializer {
     @Override
@@ -34,7 +34,7 @@ public class DeathQuotes implements ModInitializer {
 
     private void registerEvents() {
         CommandRegistrationCallback.EVENT.register(ModEventListener::registerCommands);
-        ServerLivingEntityEvents.AFTER_DEATH.register(ModEventListener::onLivingDeath);
+        ServerPlayerEvents.AFTER_DEATH.register(ModEventListener::onServerPlayerDeath);
         ApplicationEvents.BEFORE_SHUTDOWN.register(ModEventListener::beforeShutdown);
     }
 }

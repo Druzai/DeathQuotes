@@ -2,6 +2,9 @@
   "required": true,
   "package": "com.cazsius.deathquotes.mixin",
   "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "entity.ServerPlayerMixin"
+  ],
   "client": [
     "application.ClientMinecraftMixin"
   ],

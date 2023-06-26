@@ -5,6 +5,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 public final class CommonConfig {
     private static final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
     private static ForgeConfigSpec spec;
+    private static ForgeConfigSpec.BooleanValue showDeathQuotesRegardlessOfGameRule;
     private static ForgeConfigSpec.IntValue nonRepeatablePercent;
     private static ForgeConfigSpec.BooleanValue clearListOfNonRepeatableQuotes;
     private static ForgeConfigSpec.BooleanValue enableQuotationMarks;
@@ -25,6 +26,9 @@ public final class CommonConfig {
 
     private static void setMainOptions() {
         builder.push("mainOptions");
+        showDeathQuotesRegardlessOfGameRule = builder
+                .comment(ConfigComments.showDeathQuotesRegardlessOfGameRule)
+                .define("showDeathQuotesRegardlessOfGameRule", true);
         nonRepeatablePercent = builder
                 .comment(ConfigComments.nonRepeatablePercent)
                 .defineInRange("nonRepeatablePercent", 5, 0, 100);
@@ -62,6 +66,7 @@ public final class CommonConfig {
     }
 
     public static void pushChanges() {
+        Settings.setShowDeathQuotesRegardlessOfGameRule(showDeathQuotesRegardlessOfGameRule.get());
         Settings.setNonRepeatablePercent(nonRepeatablePercent.get());
         Settings.setClearListOfNonRepeatableQuotes(clearListOfNonRepeatableQuotes.get());
         Settings.setEnableQuotationMarks(enableQuotationMarks.get());
