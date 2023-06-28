@@ -7,6 +7,7 @@ subprojects {
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
         options.release.set(JavaLanguageVersion.of(minecraft_java_build_version).asInt())
+        sourceCompatibility = targetCompatibility = minecraft_java_build_version // Need this here so eclipse task generates correctly.
     }
 
     def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta', 'fabric.mod.json']
