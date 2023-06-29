@@ -27,11 +27,13 @@ on [curseforge](https://www.curseforge.com/minecraft/mc-mods/deathquotes-death-q
 
 ## Changes/Enhancements:
 
+- File `deathquotes.txt` now loaded and saved using `UTF-8` encoding
+    - As fallback encodings: `ASCII` (`ISO646-US`) and `UTF-16` are also checked
 - Added config file creation
     - For `Forge` in path `./config/deathquotes-common.toml`
     - For `Fabric` in path `./config/deathquotes.toml`
-- Added command to reload deathquotes.txt in game - `/deathquotes reloadQuotes` (only available for server operators or
-  when cheats are enabled)
+- Added command to reload file `deathquotes.txt` in game - `/deathquotes reloadQuotes` (only available for server
+  operators or when cheats are enabled)
 - Added a method to prevent quotes from repeating so often and options for it in config file
 - Added options to replace certain symbols with player name and next line symbol (also configurable)
 - Added option to display death quotes based on the value of gamerule `showDeathMessages` or display regardless of it
