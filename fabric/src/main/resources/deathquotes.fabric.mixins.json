@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "com.cazsius.deathquotes.mixin",
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_8",
   "mixins": [
     "entity.ServerPlayerMixin"
   ],
