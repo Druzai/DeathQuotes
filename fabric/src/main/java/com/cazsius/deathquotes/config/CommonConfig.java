@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommonConfig {
     private static ConfigSpec spec;
@@ -87,7 +88,7 @@ public class CommonConfig {
     private static List<String> getPath(Field field) {
         Path fieldPath = field.getDeclaredAnnotation(Path.class);
         if (fieldPath != null) {
-            return Arrays.stream(fieldPath.value().split("\\.")).toList();
+            return Arrays.stream(fieldPath.value().split("\\.")).collect(Collectors.toList());
         }
         return Collections.singletonList(field.getName());
     }

@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import static com.cazsius.deathquotes.utils.Constants.*;
@@ -38,7 +37,7 @@ public final class Funcs {
     public static boolean copyQuotesToConfig() {
         Path sourceDirectory;
         Optional<Path> optionalPath = getQuotesFileDirFromJar();
-        if (optionalPath.isEmpty()) {
+        if (!optionalPath.isPresent()) {
             return false;
         }
         sourceDirectory = optionalPath.get();
@@ -90,6 +89,10 @@ public final class Funcs {
         }
     }
 
+    public static boolean isBlank(String string) {
+        return string.isEmpty() || string.chars().boxed().allMatch(Character::isWhitespace);
+    }
+
     public static boolean loadQuotes(boolean fromJar) {
         State previousState = state;
         state = State.LOADING_QUOTES;
@@ -97,7 +100,7 @@ public final class Funcs {
         boolean encodingException = true;
         if (fromJar) {
             Optional<Path> optionalPath = getQuotesFileDirFromJar();
-            if (optionalPath.isEmpty()) {
+            if (!optionalPath.isPresent()) {
                 state = previousState;
                 return false;
             }
@@ -105,16 +108,28 @@ public final class Funcs {
         } else {
             sourceDirectory = Paths.get(quotesPathAndFileName);
         }
-        List<Charset> charsets = List.of(StandardCharsets.UTF_8, StandardCharsets.US_ASCII, StandardCharsets.UTF_16);
+        List<Charset> charsets = new ArrayList<>();
+        charsets.add(StandardCharsets.UTF_8);
+        charsets.add(StandardCharsets.US_ASCII);
+        charsets.add(StandardCharsets.UTF_16);
         for (Charset charset : charsets) {
             try (Stream<String> lines = Files.lines(sourceDirectory, charset)) {
-                quotes = lines.filter(s -> !s.isBlank()).map(String::trim).toArray(String[]::new);
+                quotes = lines.filter(s -> !isBlank(s)).map(String::trim).toArray(String[]::new);
                 int percent = Settings.getNonRepeatablePercent();
                 int quotesNumber;
                 switch (percent) {
-                    case 0 -> quotesNumber = 0;
-                    case 100 -> quotesNumber = quotes.length;
-                    default -> quotesNumber = (int) Math.ceil((double) quotes.length / 100 * percent);
+                    case 0: {
+                        quotesNumber = 0;
+                        break;
+                    }
+                    case 100: {
+                        quotesNumber = quotes.length;
+                        break;
+                    }
+                    default: {
+                        quotesNumber = (int) Math.ceil((double) quotes.length / 100 * percent);
+                        break;
+                    }
                 }
                 if (quotesNumber >= quotes.length) {
                     quotesNumber = quotes.length - 1;
@@ -134,30 +149,11 @@ public final class Funcs {
         }
         state = previousState;
         Logger.error("Couldn't read quotes the file \"" + quotesFileName + "\" from " +
-                (fromJar ? "jar" : "\"config\" folder") + (encodingException ? " because encoding wasn't \"UTF-8\"" : "") + "!");
+                     (fromJar ? "jar" : "\"config\" folder") + (encodingException ? " because encoding wasn't \"UTF-8\"" : "") + "!");
         Logger.error("Death quotes won't work because there is no quotes available!");
         Logger.error("You can delete the file " + quotesFileName + " and restart Minecraft for default quotes! " +
-                "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
+                     "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
         return false;
-    }
-
-    public static void handlePlayerDeath(Player player) {
-        // If no quotes in the array
-        if (Funcs.getQuotesLength() == 0) {
-            Logger.error("The file " + quotesFileName + " contains no quotes. Delete it and restart for default quotes. " +
-                    "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
-            player.sendMessage(new TextComponent("The file " + quotesFileName + " contains no quotes. Check Minecraft logs!"), Util.NIL_UUID);
-            return;
-        }
-        // Getting quote
-        String quote = Funcs.getRandomQuote();
-        // Generating "tellraw" component for quote
-        quote = Funcs.handleQuote(quote, player);
-        TextComponent tellrawComponent = Funcs.generateTellrawComponentForQuote(quote);
-        // Send quote only to players
-        for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
-            serverPlayer.sendMessage(tellrawComponent, ChatType.CHAT, Util.NIL_UUID);
-        }
     }
 
     public static int getQuotesLength() {
@@ -178,18 +174,18 @@ public final class Funcs {
         return quotes[randomGenerator.nextInt(Funcs.getQuotesLength())];
     }
 
-    public static String handleQuote(String quote, Player player) {
+    public static String handleQuote(String quote, String playerName) {
         // Replace player name string if needed
         String replaceString = Settings.getPlayerNameReplaceString();
-        if (!replaceString.isBlank() && quote.contains(replaceString)) {
-            quote = quote.replace(replaceString, player.getGameProfile().getName());
+        if (!isBlank(replaceString) && quote.contains(replaceString)) {
+            quote = quote.replace(replaceString, playerName);
         }
         // Replace next line string if needed
         replaceString = Settings.getNextLineReplaceString();
-        if (!replaceString.isBlank() && quote.contains(replaceString)) {
+        if (!isBlank(replaceString) && quote.contains(replaceString)) {
             quote = quote.replace(replaceString, "\n");
             if (Settings.getEnableTrimmingBeforeAndAfterNextLine()) {
-                quote = quote.replaceAll("\s*\n\s*", "\n");
+                quote = quote.replaceAll("[ \t]*\n[ \t]*", "\n");
             }
         }
         // Add quotation marks if needed
@@ -197,49 +193,5 @@ public final class Funcs {
             quote = MessageFormat.format("\"{0}\"", quote);
         }
         return quote;
-    }
-
-    public static TextComponent generateTellrawComponentForQuote(String quote) {
-        TextComponent tellrawComponent = new TextComponent("");
-        final boolean enableItalics = Settings.getEnableItalics();
-        // Add clickable links and/or italics if needed
-        if (Settings.getEnableHttpLinkProcessing() && httpLinkPattern.matcher(quote).find()) {
-            List<TextComponent> textInBetween = Arrays
-                    .stream(quote.split(httpLinkPattern.pattern()))
-                    .map(string -> {
-                        TextComponent textComponent = new TextComponent(string);
-                        if (enableItalics) {
-                            textComponent.withStyle(ChatFormatting.ITALIC);
-                        }
-                        return textComponent;
-                    })
-                    .toList();
-            Matcher matcher = httpLinkPattern.matcher(quote);
-            for (TextComponent component : textInBetween) {
-                tellrawComponent.append(component);
-                if (matcher.find()) {
-                    MutableComponent mutableComponent = Funcs.getUrlLinkComponent(matcher.group("link"));
-                    if (enableItalics) {
-                        mutableComponent.withStyle(ChatFormatting.ITALIC);
-                    }
-                    tellrawComponent.append(mutableComponent);
-                }
-            }
-        } else {
-            TextComponent textComponent = new TextComponent(quote);
-            if (enableItalics) {
-                textComponent.withStyle(ChatFormatting.ITALIC);
-            }
-            tellrawComponent.append(textComponent);
-        }
-        return tellrawComponent;
-    }
-
-    public static MutableComponent getUrlLinkComponent(String link) {
-        return new TextComponent(link)
-                .setStyle(Style.EMPTY
-                        .applyFormat(ChatFormatting.BLUE)
-                        .applyFormat(ChatFormatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, link)));
     }
 }

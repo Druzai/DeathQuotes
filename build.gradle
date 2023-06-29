@@ -6,14 +6,13 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-        options.release.set(JavaLanguageVersion.of(minecraft_java_build_version).asInt())
-        sourceCompatibility = targetCompatibility = minecraft_java_build_version // Need this here so eclipse task generates correctly.
+        // Mojang ships Java 8 to end users in 1.16, so mod should target Java 8.
+        sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta', 'fabric.mod.json']
     def replaceProperties = [
             minecraft_version            : minecraft_version,
-            minecraft_java_build_version : minecraft_java_build_version,
             forge_minecraft_version_range: forge_minecraft_version_range,
             forge_version                : forge_version,
             forge_version_range          : forge_version_range,
