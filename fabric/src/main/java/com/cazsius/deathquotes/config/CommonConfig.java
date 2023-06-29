@@ -95,23 +95,23 @@ public class CommonConfig {
 
     private static class ConfigData {
         @Path("deathQuotes.mainOptions.showDeathQuotesRegardlessOfGameRule")
-        private boolean showDeathQuotesRegardlessOfGameRule = true;
+        public boolean showDeathQuotesRegardlessOfGameRule = true;
         @Path("deathQuotes.mainOptions.nonRepeatablePercent")
-        private int nonRepeatablePercent = 5;
+        public int nonRepeatablePercent = 5;
         @Path("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes")
-        private boolean clearListOfNonRepeatableQuotes = false;
+        public boolean clearListOfNonRepeatableQuotes = false;
         @Path("deathQuotes.mainOptions.playerNameReplaceString")
-        private String playerNameReplaceString = "${{player_name}}";
+        public String playerNameReplaceString = "${{player_name}}";
         @Path("deathQuotes.mainOptions.nextLineReplaceString")
-        private String nextLineReplaceString = "${{next_line}}";
+        public String nextLineReplaceString = "${{next_line}}";
         @Path("deathQuotes.mainOptions.enableTrimmingBeforeAndAfterNextLine")
-        private boolean enableTrimmingBeforeAndAfterNextLine = false;
+        public boolean enableTrimmingBeforeAndAfterNextLine = false;
         @Path("deathQuotes.formattingOptions.enableQuotationMarks")
-        private boolean enableQuotationMarks = true;
+        public boolean enableQuotationMarks = true;
         @Path("deathQuotes.formattingOptions.enableItalics")
-        private boolean enableItalics = false;
+        public boolean enableItalics = false;
         @Path("deathQuotes.formattingOptions.enableHttpLinkProcessing")
-        private boolean enableHttpLinkProcessing = false;
+        public boolean enableHttpLinkProcessing = false;
 
         public void pushChanges() {
             Settings.setShowDeathQuotesRegardlessOfGameRule(showDeathQuotesRegardlessOfGameRule);
