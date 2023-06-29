@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_authors}"
+  ],
+  "contact": {
+    "homepage": "${mod_curseforge_link}",
+    "sources": "${mod_github_link}"
+  },
+  "license": "${mod_license}",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.cazsius.deathquotes.DeathQuotes"
+    ]
+  },
+  "mixins": [
+    "deathquotes.fabric.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric": ">=${fabric_api_version}",
+    "java": ">=${minecraft_java_build_version}",
+    "minecraft": "${fabric_minecraft_versions}"
+  }
+}
