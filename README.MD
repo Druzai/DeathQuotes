@@ -28,10 +28,14 @@ on [curseforge](https://www.curseforge.com/minecraft/mc-mods/deathquotes-death-q
 ## Changes/Enhancements:
 
 - File `deathquotes.txt` now loaded and saved using `UTF-8` encoding
-    - As fallback encodings: `ASCII` (`ISO646-US`) and `UTF-16` are also checked
+    - As fallback encodings: default encoding and the old one (for Windows this could be `windows-1252` or `ANSI`) for
+      your system and `UTF-16` are also checked
 - Added config file creation
     - For `Forge` in path `./config/deathquotes-common.toml`
     - For `Fabric` in path `./config/deathquotes.toml`
+- For versions `1.18+` mod now uses `Xoroshiro128++` PRNG (implemented by Mojang) instead of default Java
+  LCG - `java.util.Random`
+    - This provides getting more random quotes
 - Added command to reload file `deathquotes.txt` in game - `/deathquotes reloadQuotes` (only available for server
   operators or when cheats are enabled)
 - Added a method to prevent quotes from repeating so often and options for it in config file
