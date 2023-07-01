@@ -90,7 +90,8 @@ public final class Funcs {
     }
 
     public static boolean isBlank(String string) {
-        return string.isEmpty() || string.chars().boxed().allMatch(Character::isWhitespace);
+        return string.isEmpty() ||
+               string.chars().allMatch(c -> c == ' ' || c == '\t' || Character.isWhitespace(c));
     }
 
     public static boolean loadQuotes(boolean fromJar) {
