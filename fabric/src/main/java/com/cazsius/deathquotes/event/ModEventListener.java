@@ -18,9 +18,7 @@ public class ModEventListener {
             CommandBuildContext registryAccess,
             Commands.CommandSelection environment
     ) {
-        if (environment != Commands.CommandSelection.ALL) {
-            QuotesCommands.register(dispatcher);
-        }
+        QuotesCommands.register(dispatcher);
     }
 
     public static void beforeShutdown() {
@@ -28,7 +26,11 @@ public class ModEventListener {
         ConfigFileHandler.unload();
     }
 
-    public static void onServerPlayerDeath(ServerPlayer serverPlayer, DamageSource damageSource, boolean gameRuleShowDeathMessages) {
+    public static void onServerPlayerDeath(
+            ServerPlayer serverPlayer,
+            DamageSource damageSource,
+            boolean gameRuleShowDeathMessages
+    ) {
         // Check gamerule "showDeathMessages" and associated config parameter
         if (!Settings.getShowDeathQuotesRegardlessOfGameRule() && !gameRuleShowDeathMessages) {
             return;
