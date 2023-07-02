@@ -28,6 +28,10 @@ public final class Logger {
         log(Level.ERROR, message, params);
     }
 
+    public static void error(String message, Throwable t) {
+        log(Level.ERROR, message, t);
+    }
+
     private static void log(Level logLevel, String message, Object... params) {
         LogManager.getLogger(Constants.ID).log(logLevel, message, params);
     }
