@@ -10,13 +10,14 @@ import com.electronwill.nightconfig.core.io.WritingMode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.cazsius.deathquotes.utils.Constants.ID;
 import static com.cazsius.deathquotes.utils.Constants.quotesConfigPath;
 
 public class ConfigFileHandler {
     private static final String configFileName = String.format("%s.toml", ID);
-    private static final Path configPath = Path.of(quotesConfigPath).resolve(configFileName);
+    private static final Path configPath = Paths.get(quotesConfigPath).resolve(configFileName);
     private static CommentedFileConfig configData;
 
     public static void readConfig() {
