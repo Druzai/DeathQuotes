@@ -2,11 +2,6 @@ package com.cazsius.deathquotes.utils;
 
 import com.cazsius.deathquotes.config.Settings;
 import com.cazsius.deathquotes.impl.LimitedSet;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.network.chat.*;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cazsius.deathquotes.utils.Constants.*;
@@ -45,7 +40,7 @@ public final class Funcs {
         try {
             Files.copy(sourceDirectory, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
-            Logger.error("Couldn't copy the file \"" + quotesFileName + "\" from jar to \"config\" folder!");
+            Logger.error("Couldn't copy the file \"{}\" from jar to \"config\" folder!", quotesFileName);
             return false;
         }
         return true;
@@ -84,7 +79,7 @@ public final class Funcs {
             URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
             return Optional.of(Paths.get(uri));
         } catch (Exception ex) {
-            Logger.error("Couldn't find the file \"" + quotesFileName + "\" in jar!");
+            Logger.error("Couldn't find the file \"{}\" in jar!", quotesFileName);
             return Optional.empty();
         }
     }
@@ -111,7 +106,20 @@ public final class Funcs {
         }
         List<Charset> charsets = new ArrayList<>();
         charsets.add(StandardCharsets.UTF_8);
-        charsets.add(StandardCharsets.US_ASCII);
+        if (!Charset.defaultCharset().equals(StandardCharsets.UTF_8)) {
+            charsets.add(Charset.defaultCharset());
+        }
+        try {
+            // Getting old default encoding for files created on old versions of Windows (Windows 7 and earlier)
+            // And as a compatibility with old versions of "deathquotes" mod, where file "deathquotes.txt" was encoded using ANSI
+            String oldSystemEncoding = System.getProperty("sun.jnu.encoding");
+            Charset oldSystemCharset = Charset.forName(oldSystemEncoding);
+            if (!oldSystemCharset.equals(StandardCharsets.UTF_8)) {
+                charsets.add(oldSystemCharset);
+            }
+        } catch (SecurityException | IllegalArgumentException ex) {
+            Logger.warn("Couldn't get encoding value from jvm property \"sun.jnu.encoding\"!", ex);
+        }
         charsets.add(StandardCharsets.UTF_16);
         for (Charset charset : charsets) {
             try (Stream<String> lines = Files.lines(sourceDirectory, charset)) {
@@ -145,15 +153,27 @@ public final class Funcs {
             state = previousState;
             // Status - Ready
             Logger.info("Loaded death quotes!");
-            Logger.info("Death quotes count - " + Funcs.getQuotesLength());
+            Logger.info("Death quotes count - {}", Funcs.getQuotesLength());
             return true;
         }
         state = previousState;
-        Logger.error("Couldn't read quotes the file \"" + quotesFileName + "\" from " +
-                     (fromJar ? "jar" : "\"config\" folder") + (encodingException ? " because encoding wasn't \"UTF-8\"" : "") + "!");
+        Logger.error(
+                "Couldn't read quotes the file \"{}\" from {}{}!",
+                quotesFileName,
+                fromJar ? "jar" : "\"config\" folder",
+                encodingException ?
+                        String.format(
+                                " because encoding wasn't in the list of supported encodings: %s",
+                                charsets.stream().map(Charset::displayName).collect(Collectors.joining(", "))
+                        )
+                        : ""
+        );
         Logger.error("Death quotes won't work because there is no quotes available!");
-        Logger.error("You can delete the file " + quotesFileName + " and restart Minecraft for default quotes! " +
-                     "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
+        Logger.error(
+                "You can delete the file {} and restart Minecraft for default quotes! " +
+                "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!",
+                quotesFileName
+        );
         return false;
     }
 
@@ -164,13 +184,17 @@ public final class Funcs {
     public static String getRandomQuote() {
         if (quotesSet.getSize() > 0) {
             final int maxIterations = quotesSet.getSize() * 2;
+            int randomNumber;
             for (int i = 0; i < maxIterations; i++) {
-                int randomNumber = randomGenerator.nextInt(Funcs.getQuotesLength());
+                randomNumber = randomGenerator.nextInt(Funcs.getQuotesLength());
                 if (quotesSet.contains(randomNumber)) continue;
                 quotesSet.add(randomNumber);
                 return quotes[randomNumber];
             }
-            Logger.error(String.format("Searched for the fresh quote for too long (more than %s tries)!", maxIterations));
+            Logger.warn(
+                    "Searched for the fresh unrepeated quote for too long (more than {} tries)! Getting a random one...",
+                    maxIterations
+            );
         }
         return quotes[randomGenerator.nextInt(Funcs.getQuotesLength())];
     }
@@ -191,7 +215,7 @@ public final class Funcs {
         }
         // Add quotation marks if needed
         if (Settings.getEnableQuotationMarks()) {
-            quote = MessageFormat.format("\"{0}\"", quote);
+            quote = String.format("\"%s\"", quote);
         }
         return quote;
     }

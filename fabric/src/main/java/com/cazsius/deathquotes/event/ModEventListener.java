@@ -61,15 +61,22 @@ public class ModEventListener {
         ConfigFileHandler.unload();
     }
 
-    public static void onServerPlayerDeath(ServerPlayer player, DamageSource damageSource, boolean gameRuleShowDeathMessages) {
+    public static void onServerPlayerDeath(
+            ServerPlayer player,
+            DamageSource damageSource,
+            boolean gameRuleShowDeathMessages
+    ) {
         // Check gamerule "showDeathMessages" and associated config parameter
         if (!Settings.getShowDeathQuotesRegardlessOfGameRule() && !gameRuleShowDeathMessages) {
             return;
         }
         // If no quotes in the array
         if (Funcs.getQuotesLength() == 0) {
-            Logger.error("The file " + quotesFileName + " contains no quotes. Delete it and restart for default quotes. " +
-                         "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!");
+            Logger.error(
+                    "The file {} contains no quotes. Delete it and restart for default quotes. " +
+                    "Or edit that file and reload it in the game with command \"/deathquotes reloadQuotes\"!",
+                    quotesFileName
+            );
             player.sendMessage(new TextComponent("The file " + quotesFileName + " contains no quotes. Check Minecraft logs!"), Util.NIL_UUID);
             return;
         }
