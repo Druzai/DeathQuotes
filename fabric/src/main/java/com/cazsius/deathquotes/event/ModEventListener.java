@@ -20,7 +20,11 @@ public class ModEventListener {
         ConfigFileHandler.unload();
     }
 
-    public static void onServerPlayerDeath(ServerPlayer serverPlayer, DamageSource damageSource, boolean gameRuleShowDeathMessages) {
+    public static void onServerPlayerDeath(
+            ServerPlayer serverPlayer,
+            DamageSource damageSource,
+            boolean gameRuleShowDeathMessages
+    ) {
         // Check gamerule "showDeathMessages" and associated config parameter
         if (!Settings.getShowDeathQuotesRegardlessOfGameRule() && !gameRuleShowDeathMessages) {
             return;

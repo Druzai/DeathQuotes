@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 
 public class LimitedSet<T> {
     private final LinkedHashSet<T> set = new LinkedHashSet<>();
-    private final Integer size;
+    private final int size;
     private final boolean clearOnLimit;
 
     public LimitedSet(int size, boolean clearOnLimit) {
@@ -22,7 +22,7 @@ public class LimitedSet<T> {
 
     synchronized public boolean add(T item) {
         if (set.size() >= size) {
-            if (clearOnLimit){
+            if (clearOnLimit) {
                 set.clear();
             } else {
                 set.remove(first());
