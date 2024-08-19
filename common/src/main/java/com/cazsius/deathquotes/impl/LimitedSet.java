@@ -17,7 +17,7 @@ public class LimitedSet<T> {
     }
 
     private T first() {
-        return set.iterator().next();
+        return set.getFirst();
     }
 
     synchronized public boolean add(T item) {

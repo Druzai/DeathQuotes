@@ -1,7 +1,7 @@
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
@@ -22,10 +22,15 @@ dependencies {
     dependencyProjects.forEach {
         implementation it
     }
+    // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transitive dependencies request 6.0+
+    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
 
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
+
+    // use Official mappings at runtime
+    reobf = false
 
     enableEclipsePrepareRuns = true
     enableIdeaPrepareRuns = true
@@ -40,6 +45,8 @@ minecraft {
             workingDirectory project.file('run/client')
 
             ideaModule 'DeathQuotes.forge.main'
+
+            property 'forge.enabledGameTestNamespaces', mod_id
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
@@ -68,6 +75,8 @@ minecraft {
 
             ideaModule 'DeathQuotes.forge.main'
 
+            property 'forge.enabledGameTestNamespaces', mod_id
+
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
@@ -90,6 +99,8 @@ minecraft {
             workingDirectory project.file('run/gameTestServer')
 
             ideaModule 'DeathQuotes.forge.main'
+
+            property 'forge.enabledGameTestNamespaces', mod_id
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
@@ -148,7 +159,7 @@ tasks.named('jar', Jar) {
         from p.sourceSets.main.output
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    finalizedBy('reobfJar')
+//    finalizedBy('reobfJar')
 }
 
 tasks.register('deobfJar', Jar) {
@@ -170,3 +181,13 @@ artifacts {
     archives sourcesJar
     archives deobfJar
 }
+
+// Merge the resources and classes into the same directory.
+// This is done because java expects modules to be in a single directory.
+// And if we have it in multiple we have to do performance intensive hacks like having the UnionFileSystem
+// This will eventually be migrated to ForgeGradle so modders don't need to manually do it. But that is later.
+//sourceSets.each {
+//    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+//    it.output.resourcesDir = dir
+//    it.java.destinationDirectory = dir
+//}
