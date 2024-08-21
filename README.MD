@@ -6,11 +6,12 @@
 - `1.17.1`
 - `1.18.2`
 - `1.19.2`-`1.19.4`
-- `1.20.1`
+- `1.20.1`-`1.20.4`
 
 ## Supported mod loaders:
 - `Forge`
-- `Fabric` 
+- `NeoForge`
+- `Fabric` (requires Fabric API)
 - `Quilt` (requires Quilted Fabric API)
 
 ## Features:
