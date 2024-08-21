@@ -11,7 +11,8 @@
 
 ## Supported mod loaders:
 - `Forge`
-- `Fabric` 
+- `NeoForge`
+- `Fabric` (requires Fabric API)
 - `Quilt` (requires Quilted Fabric API)
 
 ## Features:

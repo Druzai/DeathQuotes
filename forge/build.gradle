@@ -20,10 +20,22 @@ dependencyProjects.forEach {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     dependencyProjects.forEach {
-        implementation it
+        compileOnly it
     }
     // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transitive dependencies request 6.0+
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    for (p in dependencyProjects) {
+        source p.sourceSets.main.allSource
+    }
+}
+
+processResources {
+    for (p in dependencyProjects) {
+        from p.sourceSets.main.resources
+    }
 }
 
 minecraft {
@@ -41,13 +53,8 @@ minecraft {
     copyIdeResources = true
 
     runs {
-        client {
-            workingDirectory project.file('run/client')
-
-            ideaModule 'DeathQuotes.forge.main'
-
-            property 'forge.enabledGameTestNamespaces', mod_id
-
+        // applies to all the run configs below
+        configureEach {
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
             // "SCAN": For mods scan.
@@ -58,38 +65,24 @@ minecraft {
             // Recommended logging level for the console
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
+            ideaModule "${rootProject.name}.${project.name}.main"
             mods {
                 "${mod_id}" {
                     source sourceSets.main
-                    for (p in dependencyProjects) {
-                        source p.sourceSets.main
-                    }
                 }
             }
         }
 
+        client {
+            workingDirectory project.file('run/client')
+        }
+
         server {
             workingDirectory project.file('run/server')
-
-            ideaModule 'DeathQuotes.forge.main'
-
-            property 'forge.enabledGameTestNamespaces', mod_id
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
             arg 'nogui'
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                    for (p in dependencyProjects) {
-                        source p.sourceSets.main
-                    }
-                }
-            }
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
@@ -97,42 +90,12 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             workingDirectory project.file('run/gameTestServer')
-
-            ideaModule 'DeathQuotes.forge.main'
-
             property 'forge.enabledGameTestNamespaces', mod_id
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', mod_id
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                    for (p in dependencyProjects) {
-                        source p.sourceSets.main
-                    }
-                }
-            }
         }
 
         data {
             workingDirectory project.file('run/data')
-
-            ideaModule 'DeathQuotes.forge.main'
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                    for (p in dependencyProjects) {
-                        source p.sourceSets.main
-                    }
-                }
-            }
         }
     }
 }
@@ -186,8 +149,8 @@ artifacts {
 // This is done because java expects modules to be in a single directory.
 // And if we have it in multiple we have to do performance intensive hacks like having the UnionFileSystem
 // This will eventually be migrated to ForgeGradle so modders don't need to manually do it. But that is later.
-//sourceSets.each {
-//    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-//    it.output.resourcesDir = dir
-//    it.java.destinationDirectory = dir
-//}
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}

@@ -37,7 +37,23 @@ dependencies {
     include "com.electronwill.night-config:core:${fabric_night_config_version}"
     include "com.electronwill.night-config:toml:${fabric_night_config_version}"
     dependencyProjects.forEach {
-        implementation it
+        compileOnly it
+    }
+}
+
+java {
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    for (p in dependencyProjects) {
+        source p.sourceSets.main.allSource
+    }
+}
+
+processResources {
+    for (p in dependencyProjects) {
+        p.sourceSets.main.resources
     }
 }
 
@@ -56,16 +72,6 @@ loom {
             ideConfigGenerated(true)
             runDir("run/server")
         }
-    }
-}
-
-java {
-    withSourcesJar()
-}
-
-tasks.withType(ProcessResources).configureEach {
-    for (p in dependencyProjects) {
-        from p.sourceSets.main.resources
     }
 }
 
