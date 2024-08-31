@@ -39,7 +39,7 @@ public class ModEventListener {
                                         true
                                 );
                             } else {
-                                boolean done = Funcs.loadQuotes(false);
+                                boolean done = Funcs.loadQuotes();
                                 commandContext.getSource().sendSuccess(
                                         new TextComponent(
                                                 done

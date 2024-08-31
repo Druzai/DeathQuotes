@@ -5,8 +5,8 @@ import com.cazsius.deathquotes.impl.LimitedSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,21 +24,25 @@ public final class Funcs {
     private static LimitedSet<Integer> quotesSet;
     private static final Random randomGenerator = new Random();
     private static State state = State.IDLE;
+    private static InputStream assetInputStream = null;
+
+    public static void setAssetInputStream(final InputStream assetInputStream) {
+        Funcs.assetInputStream = assetInputStream;
+    }
 
     public static State getState() {
         return state;
     }
 
     public static boolean copyQuotesToConfig() {
-        Path sourceDirectory;
-        Optional<Path> optionalPath = getQuotesFileDirFromJar();
-        if (!optionalPath.isPresent()) {
+        Optional<InputStream> optionalInputStream = getQuotesFileDirFromJar();
+        if (!optionalInputStream.isPresent()) {
             return false;
         }
-        sourceDirectory = optionalPath.get();
+        InputStream sourceInputStream = optionalInputStream.get();
         Path targetDirectory = Paths.get(quotesPathAndFileName);
         try {
-            Files.copy(sourceDirectory, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(sourceInputStream, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             Logger.error("Couldn't copy the file \"{}\" from jar to \"config\" folder!", quotesFileName);
             return false;
@@ -74,11 +78,10 @@ public final class Funcs {
         }
     }
 
-    public static Optional<Path> getQuotesFileDirFromJar() {
-        try {
-            URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
-            return Optional.of(Paths.get(uri));
-        } catch (Exception ex) {
+    public static Optional<InputStream> getQuotesFileDirFromJar() {
+        if (assetInputStream != null) {
+            return Optional.of(assetInputStream);
+        } else {
             Logger.error("Couldn't find the file \"{}\" in jar!", quotesFileName);
             return Optional.empty();
         }
@@ -89,21 +92,11 @@ public final class Funcs {
                string.chars().allMatch(c -> c == ' ' || c == '\t' || Character.isWhitespace(c));
     }
 
-    public static boolean loadQuotes(boolean fromJar) {
+    public static boolean loadQuotes() {
         State previousState = state;
         state = State.LOADING_QUOTES;
-        Path sourceDirectory;
         boolean encodingException = true;
-        if (fromJar) {
-            Optional<Path> optionalPath = getQuotesFileDirFromJar();
-            if (!optionalPath.isPresent()) {
-                state = previousState;
-                return false;
-            }
-            sourceDirectory = optionalPath.get();
-        } else {
-            sourceDirectory = Paths.get(quotesPathAndFileName);
-        }
+        Path sourceDirectory = Paths.get(quotesPathAndFileName);
         List<Charset> charsets = new ArrayList<>();
         charsets.add(StandardCharsets.UTF_8);
         if (!Charset.defaultCharset().equals(StandardCharsets.UTF_8)) {
@@ -160,7 +153,7 @@ public final class Funcs {
         Logger.error(
                 "Couldn't read quotes the file \"{}\" from {}{}!",
                 quotesFileName,
-                fromJar ? "jar" : "\"config\" folder",
+                "\"config\" folder",
                 encodingException ?
                         String.format(
                                 " because encoding wasn't in the list of supported encodings: %s",
