@@ -9,6 +9,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import static com.cazsius.deathquotes.utils.Constants.quotesAssetPathAndFileName;
+
 @Mod(Constants.ID)
 public class DeathQuotes {
     public DeathQuotes() {
@@ -20,18 +22,19 @@ public class DeathQuotes {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        // Get asset InputStream from main class
+        Funcs.setAssetInputStream(getClass().getClassLoader().getResourceAsStream(quotesAssetPathAndFileName));
         // If config folder doesn't exist in root directory - create one
         if (!Funcs.configDirExists()) {
             Funcs.createConfigDir();
         }
         // If no quotes file in the config folder - create the default from the one in the jar file assets folder
-        boolean readFromJar = false;
         if (!Funcs.quotesFileExistsInConfig()) {
-            readFromJar = !Funcs.copyQuotesToConfig();
+            Funcs.copyQuotesToConfig();
         }
         // End of creation of the default quotes file
 
         // Load the quotes file into an array for use
-        Funcs.loadQuotes(readFromJar);
+        Funcs.loadQuotes();
     }
 }
