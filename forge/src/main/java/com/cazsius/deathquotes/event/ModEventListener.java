@@ -4,7 +4,7 @@ import com.cazsius.deathquotes.commands.QuotesCommands;
 import com.cazsius.deathquotes.config.Settings;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Funcs;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -30,11 +30,14 @@ public class ModEventListener {
             return;
         }
         // For players only
-        if (!(event.getEntity() instanceof Player player)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
         // Check gamerule "showDeathMessages" and associated config parameter
-        if (!Settings.getShowDeathQuotesRegardlessOfGameRule() && !player.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
+        if (
+                !Settings.getShowDeathQuotesRegardlessOfGameRule() &&
+                !player.serverLevel().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
+        ) {
             return;
         }
         Funcs.handlePlayerDeath(player);

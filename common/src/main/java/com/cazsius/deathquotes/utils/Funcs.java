@@ -12,10 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URI;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -42,18 +39,21 @@ public final class Funcs {
     }
 
     public static boolean copyQuotesToConfig() {
-        Path sourceDirectory;
-        Optional<Path> optionalPath = getQuotesFileDirFromJar();
-        if (optionalPath.isEmpty()) {
+        Optional<InputStream> optionalInputStream = getQuotesFileInputStreamFromJar();
+        if (optionalInputStream.isEmpty()) {
             return false;
         }
-        sourceDirectory = optionalPath.get();
         Path targetDirectory = Paths.get(quotesPathAndFileName);
         try {
-            Files.copy(sourceDirectory, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(optionalInputStream.get(), targetDirectory, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             Logger.error("Couldn't copy the file \"{}\" from jar to \"config\" folder!", quotesFileName);
             return false;
+        }
+        try {
+            optionalInputStream.get().close();
+        } catch (IOException ex) {
+            Logger.error(ex.getMessage());
         }
         return true;
     }
@@ -86,31 +86,24 @@ public final class Funcs {
         }
     }
 
-    public static Optional<Path> getQuotesFileDirFromJar() {
+    private static Optional<InputStream> getQuotesFileInputStreamFromJar() {
         try {
-            URI uri = Objects.requireNonNull(Funcs.class.getClassLoader().getResource("assets/" + quotesFileName)).toURI();
-            return Optional.of(Paths.get(uri));
+            InputStream is = Funcs.class.getClassLoader().getResourceAsStream(quotesAssetPathAndFileName);
+            if (is == null)
+                throw new IOException("Couldn't find asset \"" + quotesFileName + "\"");
+            else
+                return Optional.of(is);
         } catch (Exception ex) {
             Logger.error("Couldn't find the file \"{}\" in jar!", quotesFileName);
             return Optional.empty();
         }
     }
 
-    public static boolean loadQuotes(boolean fromJar) {
+    public static boolean loadQuotes() {
         State previousState = state;
         state = State.LOADING_QUOTES;
-        Path sourceDirectory;
+        Path sourceDirectory = Paths.get(quotesPathAndFileName);
         boolean encodingException = true;
-        if (fromJar) {
-            Optional<Path> optionalPath = getQuotesFileDirFromJar();
-            if (optionalPath.isEmpty()) {
-                state = previousState;
-                return false;
-            }
-            sourceDirectory = optionalPath.get();
-        } else {
-            sourceDirectory = Paths.get(quotesPathAndFileName);
-        }
         List<Charset> charsets = new ArrayList<>();
         charsets.add(StandardCharsets.UTF_8);
         if (!Charset.defaultCharset().equals(StandardCharsets.UTF_8)) {
@@ -156,9 +149,8 @@ public final class Funcs {
         }
         state = previousState;
         Logger.error(
-                "Couldn't read quotes the file \"{}\" from {}{}!",
+                "Couldn't read quotes the file \"{}\" from \"config\" folder{}!",
                 quotesFileName,
-                fromJar ? "jar" : "\"config\" folder",
                 encodingException ?
                         String.format(
                                 " because encoding wasn't in the list of supported encodings: %s",
@@ -175,7 +167,7 @@ public final class Funcs {
         return false;
     }
 
-    public static void handlePlayerDeath(Player player) {
+    public static void handlePlayerDeath(ServerPlayer player) {
         // If no quotes in the array
         if (Funcs.getQuotesLength() == 0) {
             Logger.error(

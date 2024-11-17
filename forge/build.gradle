@@ -26,6 +26,10 @@ dependencies {
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
 
+repositories {
+    maven { url = "https://libraries.minecraft.net" }
+}
+
 tasks.withType(JavaCompile).configureEach {
     for (p in dependencyProjects) {
         source p.sourceSets.main.allSource
