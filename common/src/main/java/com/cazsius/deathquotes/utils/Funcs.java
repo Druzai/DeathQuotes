@@ -24,28 +24,27 @@ public final class Funcs {
     private static LimitedSet<Integer> quotesSet;
     private static final Random randomGenerator = new Random();
     private static State state = State.IDLE;
-    private static InputStream assetInputStream = null;
-
-    public static void setAssetInputStream(final InputStream assetInputStream) {
-        Funcs.assetInputStream = assetInputStream;
-    }
 
     public static State getState() {
         return state;
     }
 
     public static boolean copyQuotesToConfig() {
-        Optional<InputStream> optionalInputStream = getQuotesFileDirFromJar();
+        Optional<InputStream> optionalInputStream = getQuotesFileInputStreamFromJar();
         if (!optionalInputStream.isPresent()) {
             return false;
         }
-        InputStream sourceInputStream = optionalInputStream.get();
         Path targetDirectory = Paths.get(quotesPathAndFileName);
         try {
-            Files.copy(sourceInputStream, targetDirectory, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(optionalInputStream.get(), targetDirectory, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             Logger.error("Couldn't copy the file \"{}\" from jar to \"config\" folder!", quotesFileName);
             return false;
+        }
+        try {
+            optionalInputStream.get().close();
+        } catch (IOException ex) {
+            Logger.error(ex.getMessage());
         }
         return true;
     }
@@ -78,10 +77,14 @@ public final class Funcs {
         }
     }
 
-    public static Optional<InputStream> getQuotesFileDirFromJar() {
-        if (assetInputStream != null) {
-            return Optional.of(assetInputStream);
-        } else {
+    private static Optional<InputStream> getQuotesFileInputStreamFromJar() {
+        try {
+            InputStream is = Funcs.class.getClassLoader().getResourceAsStream(quotesAssetPathAndFileName);
+            if (is == null)
+                throw new IOException("Couldn't find asset \"" + quotesFileName + "\"");
+            else
+                return Optional.of(is);
+        } catch (Exception ex) {
             Logger.error("Couldn't find the file \"{}\" in jar!", quotesFileName);
             return Optional.empty();
         }
@@ -151,9 +154,8 @@ public final class Funcs {
         }
         state = previousState;
         Logger.error(
-                "Couldn't read quotes the file \"{}\" from {}{}!",
+                "Couldn't read quotes the file \"{}\" from \"config\" folder{}!",
                 quotesFileName,
-                "\"config\" folder",
                 encodingException ?
                         String.format(
                                 " because encoding wasn't in the list of supported encodings: %s",
