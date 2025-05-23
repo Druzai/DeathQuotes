@@ -22,14 +22,13 @@ public class DeathQuotes implements ModInitializer {
             Funcs.createConfigDir();
         }
         // If no quotes file in the config folder - create the default from the one in the jar file assets folder
-        boolean readFromJar = false;
         if (!Funcs.quotesFileExistsInConfig()) {
-            readFromJar = !Funcs.copyQuotesToConfig();
+            Funcs.copyQuotesToConfig();
         }
         // End of creation of the default quotes file
 
         // Load the quotes file into an array for use
-        Funcs.loadQuotes(readFromJar);
+        Funcs.loadQuotes();
     }
 
     private void registerEvents() {
