@@ -12,14 +12,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -273,6 +280,6 @@ public final class Funcs {
                 .setStyle(Style.EMPTY
                         .applyFormat(ChatFormatting.BLUE)
                         .applyFormat(ChatFormatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, link)));
+                        .withClickEvent(new ClickEvent.OpenUrl(URI.create(link))));
     }
 }

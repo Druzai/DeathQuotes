@@ -37,20 +37,12 @@ public class ConfigFileHandler {
             throw new RuntimeException("Couldn't load config file", ex);
         }
         Logger.debug("Loaded TOML config file {}", configPath.toString());
-        try {
-            FileWatcher.defaultInstance().addWatch(configPath, new ConfigWatcher(configData, Thread.currentThread().getContextClassLoader()));
-            Logger.debug("Watching TOML config file {} for changes", configPath.toString());
-        } catch (IOException e) {
-            throw new RuntimeException("Couldn't watch config file", e);
-        }
+        FileWatcher.defaultInstance().addWatch(configPath, new ConfigWatcher(configData, Thread.currentThread().getContextClassLoader()));
+        Logger.debug("Watching TOML config file {} for changes", configPath.toString());
     }
 
     public static void unload() {
-        try {
-            FileWatcher.defaultInstance().removeWatch(configPath);
-        } catch (RuntimeException e) {
-            Logger.error("Failed to remove config {} from file watcher!", configPath.toString(), e);
-        }
+        FileWatcher.defaultInstance().removeWatch(configPath);
         if (configData != null) {
             configData.close();
         }

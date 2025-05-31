@@ -3,7 +3,7 @@ plugins {
     id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.neoforged.moddev' version '1.0.21'
+    id 'net.neoforged.moddev' version '2.0.89'
 }
 
 base {
@@ -93,8 +93,8 @@ neoForge {
             gameDirectory = file("run/gameTestServer")
         }
 
-        data {
-            data()
+        clientData {
+            clientData()
             gameDirectory = file("run/data")
             programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
