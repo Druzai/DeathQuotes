@@ -12,7 +12,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
-@EventBusSubscriber(modid = Constants.ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = Constants.ID)
 public class ModEventListener {
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
@@ -36,7 +36,7 @@ public class ModEventListener {
         // Check gamerule "showDeathMessages" and associated config parameter
         if (
                 !Settings.getShowDeathQuotesRegardlessOfGameRule() &&
-                !player.serverLevel().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
+                !player.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
         ) {
             return;
         }

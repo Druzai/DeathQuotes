@@ -8,8 +8,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.Priority;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = Constants.ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -19,14 +19,10 @@ public class ModEventListener {
         QuotesCommands.register(event.getDispatcher());
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent(priority = Priority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
         // Run only on dedicated or integrated server
         if (event.getEntity().getServer() == null) {
-            return;
-        }
-        // Check if event was cancelled by other mod
-        if (event.isCanceled()) {
             return;
         }
         // For players only
@@ -36,7 +32,7 @@ public class ModEventListener {
         // Check gamerule "showDeathMessages" and associated config parameter
         if (
                 !Settings.getShowDeathQuotesRegardlessOfGameRule() &&
-                !player.serverLevel().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
+                !player.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)
         ) {
             return;
         }

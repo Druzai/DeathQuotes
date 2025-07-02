@@ -3,7 +3,7 @@ package com.cazsius.deathquotes.event;
 import com.cazsius.deathquotes.config.CommonConfig;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Logger;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 

@@ -7,7 +7,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 
-@EventBusSubscriber(modid = Constants.ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Constants.ID)
 public class ConfigListener {
     @SubscribeEvent
     public static void onLoad(ModConfigEvent.Loading configEvent) {

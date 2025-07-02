@@ -12,7 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class DeathQuotes {
     public DeathQuotes(FMLJavaModLoadingContext context) {
         // Register the setup method for mod loading
-        context.getModEventBus().addListener(this::commonSetup);
+        FMLCommonSetupEvent.getBus(context.getModBusGroup()).addListener(this::commonSetup);
 
         CommonConfig.build();
         context.registerConfig(ModConfig.Type.COMMON, CommonConfig.getSpec());
