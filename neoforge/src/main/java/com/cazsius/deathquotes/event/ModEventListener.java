@@ -22,7 +22,7 @@ public class ModEventListener {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
         // Run only on dedicated or integrated server
-        if (event.getEntity().getServer() == null) {
+        if (event.getEntity().level().getServer() == null) {
             return;
         }
         // Check if event was cancelled by other mod

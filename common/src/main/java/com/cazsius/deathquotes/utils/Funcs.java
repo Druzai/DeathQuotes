@@ -191,7 +191,7 @@ public final class Funcs {
         quote = Funcs.handleQuote(quote, player);
         Component tellrawComponent = Funcs.generateTellrawComponentForQuote(quote);
         // Send quote only to players
-        for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayer serverPlayer : player.level().getServer().getPlayerList().getPlayers()) {
             serverPlayer.sendSystemMessage(tellrawComponent);
         }
     }
@@ -222,7 +222,7 @@ public final class Funcs {
         // Replace player name string if needed
         String replaceString = Settings.getPlayerNameReplaceString();
         if (!replaceString.isBlank() && quote.contains(replaceString)) {
-            quote = quote.replace(replaceString, player.getGameProfile().getName());
+            quote = quote.replace(replaceString, player.getGameProfile().name());
         }
         // Replace next line string if needed
         replaceString = Settings.getNextLineReplaceString();
