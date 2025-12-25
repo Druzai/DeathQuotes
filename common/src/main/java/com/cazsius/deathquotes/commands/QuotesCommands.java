@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 public class QuotesCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         final LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(Constants.ID)
-                .requires(commandSourceStack -> commandSourceStack.hasPermission(2));
+                .requires(Commands.hasPermission(Commands.LEVEL_ADMINS));
 
         literalArgumentBuilder.then(
                 Commands.literal("reloadQuotes")
