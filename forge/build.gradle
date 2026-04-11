@@ -1,8 +1,8 @@
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.46,6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
 }
 
 base {
@@ -18,38 +18,18 @@ dependencyProjects.forEach {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
     dependencyProjects.forEach {
         compileOnly it
     }
-    // Forge 1.21.6+ uses EventBus 7, which shifts most of its runtime validation to compile-time via an annotation processor
-    // to improve performance in production environments. This line is required to enable said compile-time validation
-    // in your development environment, helping you catch issues early.
-    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.12'
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.1'
 }
 
 repositories {
-    // Put repositories for dependencies here
+    minecraft.mavenizer(it) // In Kotlin, it = this
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
     mavenCentral()
-    maven {
-        name = 'Forge'
-        url = 'https://maven.minecraftforge.net'
-    }
-    maven {
-        name = 'Minecraft libraries'
-        url = 'https://libraries.minecraft.net'
-    }
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = 'Sponge'
-                url = 'https://repo.spongepowered.org/repository/maven-public'
-            }
-        }
-        filter {
-            includeGroupAndSubgroups('org.spongepowered')
-        }
-    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -65,19 +45,6 @@ processResources {
 }
 
 minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-
-    // use Official mappings at runtime
-    reobf = false
-
-    enableEclipsePrepareRuns = true
-    enableIdeaPrepareRuns = true
-
-    // This property allows configuring Gradle's ProcessResources task(s) to run on IDE output locations before launching the game.
-    // It is REQUIRED to be set to true for this template to function.
-    // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
-    copyIdeResources = true
-
     runs {
         // applies to all the run configs below
         configureEach {
@@ -86,43 +53,36 @@ minecraft {
             // "SCAN": For mods scan.
             // "REGISTRIES": For firing of registry events.
             // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
 
             // Recommended logging level for the console
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'info'
+            systemProperty 'forge.logging.console.level', 'info'
             // Recommended for development - enables more descriptive errors at the cost of slower startup and registration.
-            property 'eventbus.api.strictRuntimeChecks', 'true'
-
-            ideaModule "${rootProject.name}.${project.name}.main"
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
         }
 
-        client {
-            workingDirectory project.file('run/client')
+        register('client') {
+            workingDir = layout.projectDirectory.dir('run/client')
         }
 
-        server {
-            workingDirectory project.file('run/server')
-            property 'forge.enabledGameTestNamespaces', mod_id
-            arg 'nogui'
+        register('server') {
+            workingDir = layout.projectDirectory.dir('run/server')
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
+            args 'nogui'
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run/gameTestServer')
-            property 'forge.enabledGameTestNamespaces', mod_id
+        register('gameTestServer') {
+            workingDir = layout.projectDirectory.dir('run/gameTestServer')
+            systemProperty 'forge.enabledGameTestNamespaces', mod_id
         }
 
-        data {
-            workingDirectory project.file('run/data')
+        register('data') {
+            workingDir = layout.projectDirectory.dir('run/data')
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
     }
@@ -150,17 +110,6 @@ tasks.named('jar', Jar) {
         from p.sourceSets.main.output
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//    finalizedBy('reobfJar')
-}
-
-tasks.register('deobfJar', Jar) {
-    dependsOn classes
-    archiveClassifier = 'deobf'
-    from sourceSets.main.output
-    for (p in dependencyProjects) {
-        from p.sourceSets.main.output
-    }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType(Jar).configureEach {
@@ -170,15 +119,4 @@ tasks.withType(Jar).configureEach {
 artifacts {
     archives jar
     archives sourcesJar
-    archives deobfJar
-}
-
-// Merge the resources and classes into the same directory.
-// This is done because java expects modules to be in a single directory.
-// And if we have it in multiple we have to do performance intensive hacks like having the UnionFileSystem
-// This will eventually be migrated to ForgeGradle so modders don't need to manually do it. But that is later.
-sourceSets.each {
-    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-    it.output.resourcesDir = dir
-    it.java.destinationDirectory = dir
 }
