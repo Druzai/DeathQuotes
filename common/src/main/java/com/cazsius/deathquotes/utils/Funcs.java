@@ -191,9 +191,7 @@ public final class Funcs {
         quote = Funcs.handleQuote(quote, player);
         Component tellrawComponent = Funcs.generateTellrawComponentForQuote(quote);
         // Send quote only to players
-        for (ServerPlayer serverPlayer : player.level().getServer().getPlayerList().getPlayers()) {
-            serverPlayer.sendSystemMessage(tellrawComponent);
-        }
+        player.level().getServer().getPlayerList().broadcastSystemMessage(tellrawComponent, false);
     }
 
     public static int getQuotesLength() {

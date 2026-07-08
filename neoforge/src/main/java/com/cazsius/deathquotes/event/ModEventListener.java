@@ -25,7 +25,7 @@ public class ModEventListener {
         if (event.getEntity().level().getServer() == null) {
             return;
         }
-        // Check if event was cancelled by other mod
+        // Check if event was canceled by other mod
         if (event.isCanceled()) {
             return;
         }

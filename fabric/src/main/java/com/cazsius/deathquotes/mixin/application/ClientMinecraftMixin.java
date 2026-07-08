@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class ClientMinecraftMixin {
-    @Inject(at = @At("HEAD"), method = "destroy")
+    @Inject(at = @At("HEAD"), method = "exitWorldAndClose")
     private void stop(CallbackInfo ci) {
         ApplicationEvents.BEFORE_SHUTDOWN.invoker().beforeShutdown();
     }

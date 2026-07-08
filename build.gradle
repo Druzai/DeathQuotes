@@ -36,7 +36,6 @@ subprojects {
             neoforge_minecraft_version_range: neoforge_minecraft_version_range,
             neoforge_version                : neoforge_version,
             neoforge_version_range          : neoforge_version_range,
-            neoforge_loader_version_range   : neoforge_loader_version_range,
             fabric_loader_version           : fabric_loader_version,
             fabric_minecraft_versions       : fabric_minecraft_versions,
             fabric_api_version              : fabric_api_version,
