@@ -1,6 +1,6 @@
 package com.cazsius.deathquotes.event;
 
-import com.cazsius.deathquotes.config.CommonConfig;
+import com.cazsius.deathquotes.config.LocalConfig;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Logger;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -12,12 +12,12 @@ public class ConfigListener {
     @SubscribeEvent
     public static void onLoad(ModConfigEvent.Loading configEvent) {
         Logger.debug("Loaded {} config file {}", Constants.ID, configEvent.getConfig().getFileName());
-        CommonConfig.pushChanges();
+        LocalConfig.pushChanges();
     }
 
     @SubscribeEvent
     public static void onFileChange(ModConfigEvent.Reloading configEvent) {
         Logger.debug("Reloaded {} config file {}", Constants.ID, configEvent.getConfig().getFileName());
-        CommonConfig.pushChanges();
+        LocalConfig.pushChanges();
     }
 }

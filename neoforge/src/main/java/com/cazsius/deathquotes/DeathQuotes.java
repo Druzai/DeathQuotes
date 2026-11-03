@@ -1,6 +1,6 @@
 package com.cazsius.deathquotes;
 
-import com.cazsius.deathquotes.config.CommonConfig;
+import com.cazsius.deathquotes.config.LocalConfig;
 import com.cazsius.deathquotes.utils.Constants;
 import com.cazsius.deathquotes.utils.Funcs;
 import net.neoforged.bus.api.IEventBus;
@@ -15,8 +15,8 @@ public class DeathQuotes {
         // Register the setup method for mod loading
         modEventBus.addListener(this::commonSetup);
 
-        CommonConfig.build();
-        modContainer.registerConfig(ModConfig.Type.COMMON, CommonConfig.getSpec());
+        LocalConfig.build();
+        modContainer.registerConfig(ModConfig.Type.LOCAL, LocalConfig.getSpec());
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

@@ -2,7 +2,7 @@ package com.cazsius.deathquotes.config;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-public final class CommonConfig {
+public final class LocalConfig {
     private static final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
     private static ModConfigSpec spec;
     private static ModConfigSpec.BooleanValue showDeathQuotesRegardlessOfGameRule;
