@@ -2,19 +2,16 @@ package com.cazsius.deathquotes.config;
 
 import com.cazsius.deathquotes.utils.Logger;
 import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.ConfigSpec;
-import com.electronwill.nightconfig.core.conversion.ObjectConverter;
-import com.electronwill.nightconfig.core.conversion.Path;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.electronwill.nightconfig.core.serde.ObjectDeserializer;
+import com.electronwill.nightconfig.core.serde.ObjectSerializer;
+import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 
 public class CommonConfig {
     private static ConfigSpec spec;
+    private static final ObjectDeserializer deserializer = ObjectDeserializer.standard();
+    private static final ObjectSerializer serializer = ObjectSerializer.standard();
 
     public static void updateChanges(CommentedFileConfig commentedFileConfig, boolean updateConfig) {
         ConfigData configData;
@@ -25,7 +22,7 @@ public class CommonConfig {
         } else {
             try {
                 toSave = correct(commentedFileConfig) > 0;
-                configData = new ObjectConverter().toObject(commentedFileConfig, ConfigData::new);
+                configData = deserializer.deserializeFields(commentedFileConfig, ConfigData::new);
             } catch (Exception ex) {
                 Logger.error("Couldn't convert config \"{}\" to object! Falling back to using default values!", commentedFileConfig.getFile().getName(), ex);
                 configData = new ConfigData();
@@ -34,7 +31,7 @@ public class CommonConfig {
         }
         configData.pushChanges();
         if (updateConfig || toSave) {
-            convertConfigData(commentedFileConfig, configData);
+            serializer.serializeFields(configData, commentedFileConfig);
             commentedFileConfig.save();
             Logger.debug("Saved TOML config file {}", commentedFileConfig.getFile().getPath());
         }
@@ -60,68 +57,51 @@ public class CommonConfig {
         return spec;
     }
 
-    public static void convertConfigData(CommentedConfig commentedFileConfig, Object configClass) {
-        for (Field f : configClass.getClass().getDeclaredFields()) {
-            Object value;
-            try {
-                value = f.get(configClass);
-            } catch (IllegalAccessException e) {
-                Logger.error("Couldn't access field \"{}\" of object \"{}\"! Skipping...", f.getName(), configClass.getClass().getName());
-                continue;
-            }
-            List<String> path = getPath(f);
-            ConfigFormat<?> format = commentedFileConfig.configFormat();
-            if (!f.isAnnotationPresent(Path.class) || !format.supportsType(value.getClass())) {
-                CommentedConfig converted = commentedFileConfig.createSubConfig();
-                convertConfigData(converted, value);
-                commentedFileConfig.set(path, converted);
-            } else {
-                commentedFileConfig.set(path, value);
-                ConfigComments
-                        .getStringByName(f.getName())
-                        .ifPresent(s -> commentedFileConfig.setComment(path, s));
-            }
-        }
-    }
-
-    private static List<String> getPath(Field field) {
-        Path fieldPath = field.getDeclaredAnnotation(Path.class);
-        if (fieldPath != null) {
-            return Arrays.stream(fieldPath.value().split("\\.")).toList();
-        }
-        return Collections.singletonList(field.getName());
-    }
-
     private static class ConfigData {
-        @Path("deathQuotes.mainOptions.showDeathQuotesRegardlessOfGameRule")
-        private boolean showDeathQuotesRegardlessOfGameRule = true;
-        @Path("deathQuotes.mainOptions.nonRepeatablePercent")
-        private int nonRepeatablePercent = 5;
-        @Path("deathQuotes.mainOptions.clearListOfNonRepeatableQuotes")
-        private boolean clearListOfNonRepeatableQuotes = false;
-        @Path("deathQuotes.mainOptions.playerNameReplaceString")
-        private String playerNameReplaceString = "${{player_name}}";
-        @Path("deathQuotes.mainOptions.nextLineReplaceString")
-        private String nextLineReplaceString = "${{next_line}}";
-        @Path("deathQuotes.mainOptions.enableTrimmingBeforeAndAfterNextLine")
-        private boolean enableTrimmingBeforeAndAfterNextLine = false;
-        @Path("deathQuotes.formattingOptions.enableQuotationMarks")
-        private boolean enableQuotationMarks = true;
-        @Path("deathQuotes.formattingOptions.enableItalics")
-        private boolean enableItalics = false;
-        @Path("deathQuotes.formattingOptions.enableHttpLinkProcessing")
-        private boolean enableHttpLinkProcessing = false;
+        private final DeathQuotes deathQuotes = new DeathQuotes();
 
         public void pushChanges() {
-            Settings.setShowDeathQuotesRegardlessOfGameRule(showDeathQuotesRegardlessOfGameRule);
-            Settings.setNonRepeatablePercent(nonRepeatablePercent);
-            Settings.setClearListOfNonRepeatableQuotes(clearListOfNonRepeatableQuotes);
-            Settings.setEnableQuotationMarks(enableQuotationMarks);
-            Settings.setEnableItalics(enableItalics);
-            Settings.setEnableHttpLinkProcessing(enableHttpLinkProcessing);
-            Settings.setPlayerNameReplaceString(playerNameReplaceString);
-            Settings.setNextLineReplaceString(nextLineReplaceString);
-            Settings.setEnableTrimmingBeforeAndAfterNextLine(enableTrimmingBeforeAndAfterNextLine);
+            MainOptions mainOptions = deathQuotes.mainOptions;
+            FormattingOptions formattingOptions = deathQuotes.formattingOptions;
+
+            Settings.setShowDeathQuotesRegardlessOfGameRule(mainOptions.showDeathQuotesRegardlessOfGameRule);
+            Settings.setNonRepeatablePercent(mainOptions.nonRepeatablePercent);
+            Settings.setClearListOfNonRepeatableQuotes(mainOptions.clearListOfNonRepeatableQuotes);
+            Settings.setEnableQuotationMarks(formattingOptions.enableQuotationMarks);
+            Settings.setEnableItalics(formattingOptions.enableItalics);
+            Settings.setEnableHttpLinkProcessing(formattingOptions.enableHttpLinkProcessing);
+            Settings.setPlayerNameReplaceString(mainOptions.playerNameReplaceString);
+            Settings.setNextLineReplaceString(mainOptions.nextLineReplaceString);
+            Settings.setEnableTrimmingBeforeAndAfterNextLine(mainOptions.enableTrimmingBeforeAndAfterNextLine);
         }
+    }
+
+    private static class DeathQuotes {
+        private final MainOptions mainOptions = new MainOptions();
+        private final FormattingOptions formattingOptions = new FormattingOptions();
+    }
+
+    private static class MainOptions {
+        @SerdeComment(ConfigComments.showDeathQuotesRegardlessOfGameRule)
+        private boolean showDeathQuotesRegardlessOfGameRule = true;
+        @SerdeComment(ConfigComments.nonRepeatablePercent)
+        private int nonRepeatablePercent = 5;
+        @SerdeComment(ConfigComments.clearListOfNonRepeatableQuotes)
+        private boolean clearListOfNonRepeatableQuotes = false;
+        @SerdeComment(ConfigComments.playerNameReplaceString)
+        private String playerNameReplaceString = "${{player_name}}";
+        @SerdeComment(ConfigComments.nextLineReplaceString)
+        private String nextLineReplaceString = "${{next_line}}";
+        @SerdeComment(ConfigComments.enableTrimmingBeforeAndAfterNextLine)
+        private boolean enableTrimmingBeforeAndAfterNextLine = false;
+    }
+
+    private static class FormattingOptions {
+        @SerdeComment(ConfigComments.enableQuotationMarks)
+        private boolean enableQuotationMarks = true;
+        @SerdeComment(ConfigComments.enableItalics)
+        private boolean enableItalics = false;
+        @SerdeComment(ConfigComments.enableHttpLinkProcessing)
+        private boolean enableHttpLinkProcessing = false;
     }
 }

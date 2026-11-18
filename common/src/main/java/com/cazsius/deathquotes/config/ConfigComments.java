@@ -1,10 +1,5 @@
 package com.cazsius.deathquotes.config;
 
-import com.cazsius.deathquotes.utils.Logger;
-
-import java.lang.reflect.Field;
-import java.util.Optional;
-
 public final class ConfigComments {
     public static final String showDeathQuotesRegardlessOfGameRule = """
             Specifies whether death quotes should ignore the vanilla gamerule 'show_death_messages'.
@@ -62,19 +57,4 @@ public final class ConfigComments {
             
             Tip: Surround links with spaces or quotation marks to ensure they are detected correctly.
             Example: 'Quote with the links: "https://www.google.com/", https://www.youtube.com/watch?v=dQw4w9WgXcQ !'""";
-
-    public static Optional<String> getStringByName(String stringToFind) {
-        Field[] fields = ConfigComments.class.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getName().equals(stringToFind)) {
-                try {
-                    return Optional.ofNullable((String) f.get(ConfigComments.class));
-                } catch (IllegalAccessException ex) {
-                    Logger.error("Couldn't access field \"{}\" of object \"{}\"!", f.getName(), ConfigComments.class.getName());
-                    return Optional.empty();
-                }
-            }
-        }
-        return Optional.empty();
-    }
 }
